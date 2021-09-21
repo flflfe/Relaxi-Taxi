@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "285058738035",
+    "firebase_url": "https://relaxi-taxi-eeacc-default-rtdb.firebaseio.com",
+    "project_id": "relaxi-taxi-eeacc",
+    "storage_bucket": "relaxi-taxi-eeacc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285058738035:android:a43bf14a180099f9788706",
+        "android_client_info": {
+          "package_name": "regina.co.flutter_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "285058738035-11b5u0so8h0au6hek8dfc0chbg8osd0e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPNzBqVfnM1BN5BWSFvTA_szJhR6gu9mY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "285058738035-11b5u0so8h0au6hek8dfc0chbg8osd0e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:285058738035:android:b061269e514ff642788706",
+        "android_client_info": {
+          "package_name": "regina.co.relaxidriver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "285058738035-11b5u0so8h0au6hek8dfc0chbg8osd0e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPNzBqVfnM1BN5BWSFvTA_szJhR6gu9mY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "285058738035-11b5u0so8h0au6hek8dfc0chbg8osd0e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -71,8 +71,6 @@ class Methods
     return  double.parse(totalFare.toStringAsFixed(2));
 
   }
-
-
   static void getCurrentOnlineUserInfo() async
   {
     firebaseUser = (await FirebaseAuth.instance.currentUser)!;

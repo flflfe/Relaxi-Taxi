@@ -4,6 +4,7 @@ import 'package:flutter_app/AllScreens/searchScreen.dart';
 import 'package:flutter_app/AllWidgets/dialogueBox.dart';
 import 'package:flutter_app/AllWidgets/noDriverDialogue.dart';
 import 'package:flutter_app/Assistants/geofireAssistant.dart';
+import 'package:flutter_app/Assistants/mapKitAssistant.dart';
 import 'package:flutter_app/Assistants/utils.dart';
 import 'package:flutter_app/Configurations/configMaps.dart';
 import 'package:flutter_app/DataHandler/appData.dart';
@@ -42,10 +43,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   Set<Polyline> polyLineSet= {};
   Set<Marker> markers={};
   Set<Circle> circles= {};
- BitmapDescriptor? pickUpMarker;
- BitmapDescriptor? dropOffMarker;
- BitmapDescriptor? nearByIcon;
-
+  BitmapDescriptor? pickUpMarker;
+  BitmapDescriptor? dropOffMarker;
+  BitmapDescriptor? nearByIcon;
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
   GoogleMapController? newGoogleMapController;
   GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -58,8 +58,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   double driverDetailsHeight= 0.0;
   bool SearchIsSwitched=false;
   bool driversAvailableKeysLoaded = false;
+  LatLng oldPos= LatLng(0,0);
+  Marker? dropOffMark;
+  Marker? pickUpMark;
   late DirectionDetails tripDirectionDetails= DirectionDetails(0, 0, "", "", "");
-  void _addCustomMapMarker() async{
+  void _addCustomMapMarker() async
+  {
     pickUpMarker = await BitmapDescriptor.fromAssetImage(ImageConfiguration(), 'assets/pickUp.png');
     dropOffMarker= await BitmapDescriptor.fromAssetImage(ImageConfiguration(), 'assets/dropOff.png');
   }
@@ -181,9 +185,44 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
         }
       if(event.snapshot.value["status"]!=null)
         {
+          if(statusRide != event.snapshot.value["status"].toString()) {
             setState(() {
               statusRide = event.snapshot.value["status"].toString();
+              if (statusRide == "accepted") {
+                setState(() {
+                  pickUpMark = Marker(
+                      icon: dropOffMarker!,
+                      markerId: MarkerId("pickup"),
+                      infoWindow: InfoWindow(title: Provider
+                          .of<AppData>(context, listen: false)
+                          .dropOffLocation
+                          .placeName, snippet: "drop off location"),
+                      position: LatLng(pickUp.latitude, pickUp.longitude)
+
+                  );
+                  markers.add(pickUpMark!);
+                });
+              }
+              else if (statusRide == "onRide") {
+                setState(() {
+                  dropOffMark = Marker(
+                      icon: dropOffMarker!,
+                      markerId: MarkerId("dropoff"),
+                      infoWindow: InfoWindow(title: Provider
+                          .of<AppData>(context, listen: false)
+                          .dropOffLocation
+                          .placeName, snippet: "drop off location"),
+                      position: LatLng(dropOff.latitude, dropOff.longitude)
+
+                  );
+                  markers.add(dropOffMark!);
+                });
+              }
+              else if (statusRide == "arrived") {
+                deleteGeoFireMarkers('pickup');
+              }
             });
+          }
 
         }
       if(event.snapshot.value["car_details"]!=null)
@@ -213,23 +252,30 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
           {
             ////real time driver tracking
             updateDriverArrivalTimeToPickUp(driverCurrentLatLng);
+            setState(() {
+              oldPos = driverCurrentLatLng;
+            });
           }
         else if(statusRide=="onRide")
           {
             updateDriverArrivalTimeToDropOff(driverCurrentLatLng);
+            setState(() {
+              oldPos = driverCurrentLatLng;
+            });
           }
         else if(statusRide=="arrived")
           {
             setState(() {
-              driverArrivalStatus = "Driver Have Arrived";
+              driverArrivalStatus = "Driver Has Arrived";
             });
           }
       }
       if(statusRide =="accepted")
         {
           displayDriverInfoContainer();
-          Geofire.stopListener();
+          //Geofire.stopListener();
         }
+
 
     });
 
@@ -249,10 +295,46 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       setState(() {
         driverArrivalStatus="Driver is Coming in - "+details.durationText;
       });
+      //get the encoded points and draw the polylines
+      PolylinePoints polylinePoints = PolylinePoints();
+      List<PointLatLng> decodedPolylines =polylinePoints.decodePolyline(details.encodedPoints);
+      pLineCoordinates.clear();
+      if(decodedPolylines.isNotEmpty)
+      {
+        decodedPolylines.forEach((PointLatLng pointLatLng) {
+          pLineCoordinates.add(LatLng(pointLatLng.latitude,pointLatLng.longitude));
+
+        });
+      }
+      polyLineSet.clear();
+      setState(() {
+        Polyline polyline=Polyline(
+            color: Colors.black,
+            polylineId: PolylineId("polylineID"),
+            jointType: JointType.round,
+            points: pLineCoordinates,
+            width: 5,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+            geodesic: true
+
+        );
+        polyLineSet.add(polyline);
+        deleteGeoFireMarkers('car');
+        var rot= MapKitAssistant.getMarkerRotation(oldPos.latitude, oldPos.longitude, currentDriverLatLng.latitude,  currentDriverLatLng.longitude);
+        Marker mark=Marker(
+            markerId: MarkerId('$driverName car'),
+            icon: nearByIcon!,
+            position: currentDriverLatLng,
+            rotation: rot!
+
+        );
+        markers.add(mark);
+      });
       isReqPosDetails = false;
     }
 
-    //get the encoded points and draw the polylines
+
   }
   void updateDriverArrivalTimeToDropOff(LatLng currentDriverLatLng) async
   {
@@ -269,17 +351,53 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
         return;
       }
       setState(() {
-        driverArrivalStatus="you 'll arrive in - "+details.durationText;
+        driverArrivalStatus="You 'll arrive in - "+details.durationText;
+      });
+      PolylinePoints polylinePoints = PolylinePoints();
+      List<PointLatLng> decodedPolylines =polylinePoints.decodePolyline(details.encodedPoints);
+      pLineCoordinates.clear();
+      if(decodedPolylines.isNotEmpty)
+      {
+        decodedPolylines.forEach((PointLatLng pointLatLng) {
+          pLineCoordinates.add(LatLng(pointLatLng.latitude,pointLatLng.longitude));
+
+        });
+      }
+      polyLineSet.clear();
+      setState(() {
+        Polyline polyline=Polyline(
+            color: Colors.black,
+            polylineId: PolylineId("polylineID"),
+            jointType: JointType.round,
+            points: pLineCoordinates,
+            width: 5,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+            geodesic: true
+
+        );
+        polyLineSet.add(polyline);
+        deleteGeoFireMarkers('car');
+        var rot= MapKitAssistant.getMarkerRotation(oldPos.latitude, oldPos.longitude, currentDriverLatLng.latitude,  currentDriverLatLng.longitude);
+
+        Marker mark=Marker(
+            markerId: MarkerId('$driverName car'),
+            icon: nearByIcon!,
+            position: currentDriverLatLng,
+            rotation:rot!
+
+        );
+        markers.add(mark);
       });
       isReqPosDetails = false;
     }
 
-    //get the encoded points and draw the polylines
+
   }
-  void deleteGeoFireMarkers()
+  void deleteGeoFireMarkers(String id)
   {
     setState(() {
-      markers.removeWhere((element) => element.markerId.value.contains('car'));
+      markers.removeWhere((element) => element.markerId.value.contains(id));
     });
   }
   void cancelRideRequest()
@@ -885,7 +1003,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     var details = await Methods.obtainPlaceDirectionDetails(pickUpLatLng, dropOffLatLng);
     setState(() {
       tripDirectionDetails= details!;
-
     });
     Navigator.pop(context);
     print("This Is Encoded Points :: ");

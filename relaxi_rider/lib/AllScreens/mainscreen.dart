@@ -135,8 +135,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   List<NearByAvailableDrivers> availableDrivers=[];
   String state = "normal";
   StreamSubscription<Event>? rideStreamSubscription;
+  bool isReqPosDetails= false;
   @override
-  void initState() {
+  void initState()
+  {
     // TODO: implement initState
     super.initState();
     _addCustomMapMarker();
@@ -179,27 +181,106 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
         }
       if(event.snapshot.value["status"]!=null)
         {
-          statusRide = event.snapshot.value["status"].toString();
+            setState(() {
+              statusRide = event.snapshot.value["status"].toString();
+            });
+
         }
       if(event.snapshot.value["car_details"]!=null)
       {
-        driverCarDetails = event.snapshot.value["car_details"].toString();
+        setState(() {
+          driverCarDetails = event.snapshot.value["car_details"].toString();
+        });
       }
       if(event.snapshot.value["driver_name"]!=null)
       {
-        driverName = event.snapshot.value["driver_name"].toString();
+        setState(() {
+          driverName = event.snapshot.value["driver_name"].toString();
+        });
       }
       if(event.snapshot.value["driver_phone"]!=null)
       {
-        driverPhone = event.snapshot.value["driver_phone"].toString();
+        setState(() {
+          driverPhone = event.snapshot.value["driver_phone"].toString();
+        });
+      }
+      if(event.snapshot.value["driver_location"]!=null)
+      {
+        double driverLat = double.parse(event.snapshot.value["driver_location"]["latitude"].toString());
+        double driverLng = double.parse(event.snapshot.value["driver_location"]["longitude"].toString());
+        LatLng driverCurrentLatLng= LatLng(driverLat, driverLng);
+        if(statusRide=="accepted" || statusRide=="tracking")
+          {
+            ////real time driver tracking
+            updateDriverArrivalTimeToPickUp(driverCurrentLatLng);
+          }
+        else if(statusRide=="onRide")
+          {
+            updateDriverArrivalTimeToDropOff(driverCurrentLatLng);
+          }
+        else if(statusRide=="arrived")
+          {
+            setState(() {
+              driverArrivalStatus = "Driver Have Arrived";
+            });
+          }
       }
       if(statusRide =="accepted")
         {
           displayDriverInfoContainer();
+          Geofire.stopListener();
         }
 
     });
 
+  }
+  void updateDriverArrivalTimeToPickUp(LatLng currentDriverLatLng) async
+  {
+    if (isReqPosDetails==false) {
+      //not to spare requests
+      isReqPosDetails = true;
+      //
+      var userPosLatLng= LatLng(currentPosition.latitude, currentPosition.longitude);
+      DirectionDetails? details=await Methods.obtainPlaceDirectionDetails(currentDriverLatLng, userPosLatLng);
+      if(details == null)
+        {
+          return;
+        }
+      setState(() {
+        driverArrivalStatus="Driver is Coming in - "+details.durationText;
+      });
+      isReqPosDetails = false;
+    }
+
+    //get the encoded points and draw the polylines
+  }
+  void updateDriverArrivalTimeToDropOff(LatLng currentDriverLatLng) async
+  {
+    if (isReqPosDetails==false) {
+      //not to spare requests
+      isReqPosDetails = true;
+      //
+
+      var userDropOffPosLatLng= LatLng(Provider.of<AppData>(context, listen: false).dropOffLocation.latitude,
+          Provider.of<AppData>(context, listen: false).dropOffLocation.longitude);
+      DirectionDetails? details=await Methods.obtainPlaceDirectionDetails(currentDriverLatLng, userDropOffPosLatLng);
+      if(details == null)
+      {
+        return;
+      }
+      setState(() {
+        driverArrivalStatus="you 'll arrive in - "+details.durationText;
+      });
+      isReqPosDetails = false;
+    }
+
+    //get the encoded points and draw the polylines
+  }
+  void deleteGeoFireMarkers()
+  {
+    setState(() {
+      markers.removeWhere((element) => element.markerId.value.contains('car'));
+    });
   }
   void cancelRideRequest()
   {
@@ -209,7 +290,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     });
   }
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     createCarIconMarkers();
     final double _height= MediaQuery.of(context).size.height;
     final double _width= MediaQuery.of(context).size.width;
@@ -950,7 +1032,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     /////////
 
   }
-  void updateDriverMarkersOnMap(){
+  void updateDriverMarkersOnMap()
+  {
 
     setState(() {
       markers.clear();
@@ -974,7 +1057,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     });
 
   }
-  void createCarIconMarkers(){
+  void createCarIconMarkers()
+  {
 
     if(nearByIcon==null) {
       ImageConfiguration imageConfiguration = createLocalImageConfiguration(
@@ -986,14 +1070,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     }
 
 }
-  void noDriverFound(){
+  void noDriverFound()
+  {
   showDialog(context: context,
       barrierDismissible: false,
       builder:(BuildContext context){
         return NoDriverDialogue();
       });
 }
-  void searchNearestDriver(){
+  void searchNearestDriver()
+  {
     if (availableDrivers.length==0)
       {
         cancelRideRequest();

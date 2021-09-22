@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter_app/AllScreens/loginScreen.dart';
 import 'package:flutter_app/AllScreens/searchScreen.dart';
+import 'package:flutter_app/AllWidgets/collectCash.dart';
 import 'package:flutter_app/AllWidgets/dialogueBox.dart';
 import 'package:flutter_app/AllWidgets/noDriverDialogue.dart';
+import 'package:flutter_app/AllWidgets/rateDriver.dart';
 import 'package:flutter_app/Assistants/geofireAssistant.dart';
 import 'package:flutter_app/Assistants/mapKitAssistant.dart';
 import 'package:flutter_app/Assistants/utils.dart';
@@ -111,6 +113,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       circles.clear();
       polyLineSet.clear();
       pLineCoordinates.clear();
+      statusRide="";
+      driverName="";
+      driverPhone="";
+      driverCarDetails="";
+      driverArrivalStatus="Driver is on his way...";
+
     });
 
   }
@@ -178,7 +186,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       "dropoff_address":dropOff.placeName
     };
     rideRequestReference!.set(rideInfoMap);
-    rideStreamSubscription = rideRequestReference!.onValue.listen((event) {
+    rideStreamSubscription = rideRequestReference!.onValue.listen((event) async{
       if(event.snapshot.value ==null)
         {
           return;
@@ -275,6 +283,40 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
           displayDriverInfoContainer();
           //Geofire.stopListener();
         }
+      if(statusRide =="ended")
+      {
+        Geofire.stopListener();
+        if(event.snapshot.value["fares"]!=null)
+        {
+          double fares= double.parse(event.snapshot.value["fares"].toString());
+          var res = await showDialog(context: context,barrierDismissible: false,
+              builder:(BuildContext context){
+                return CollectCashDialogue(paymentMethod: 'cash', fareAmount: fares,);
+              });
+          String? driverId;
+          if (res=="close")
+            {
+              if(event.snapshot.value["driver_id"]!=null)
+                {
+                  driverId = event.snapshot.value["driver_id"].toString();
+
+                  showDialog(context: context,
+                      barrierDismissible: false,
+                      builder:(BuildContext context){
+                        return RateDriver(driverId: driverId,);
+                      });
+
+                }
+
+              rideRequestReference!.onDisconnect();
+              rideRequestReference=null;
+              rideStreamSubscription!.cancel();
+              rideStreamSubscription=null;
+              displaySearchContainer();
+
+            }
+        }
+      }
 
 
     });
@@ -1311,6 +1353,7 @@ class Icons_Map extends StatelessWidget {
           width: 15,
         ),
         MapButton(icon: Icon(Icons.work,color: grad1,),heroTag:"workBtn",onPressed: (){
+
         }),
 
 

@@ -81,6 +81,14 @@ flutter:
     - assets/car_mark.png
     - assets/no_driver.png
     - assets/car_mark2.png
+    - assets/pay_cash.png
+    - assets/rate.png
+    - assets/very_bad.png
+    - assets/bad.png
+    - assets/ok.png
+    - assets/good.png
+    - assets/very_good.png
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

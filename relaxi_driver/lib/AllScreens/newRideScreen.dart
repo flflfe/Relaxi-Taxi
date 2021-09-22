@@ -86,7 +86,7 @@ class _NewRideScreenState extends State<NewRideScreen> {
       if(is_tracking) {
         setState(() {
           CameraPosition cameraPosition = new CameraPosition(
-              target: mPosition, zoom: 16.0);
+              target: mPosition, zoom: 15.0);
           newRideGoogleMapController!.animateCamera(
               CameraUpdate.newCameraPosition(cameraPosition));
           markers.removeWhere((marker) => marker.markerId.value == "animating");
@@ -473,7 +473,7 @@ class _NewRideScreenState extends State<NewRideScreen> {
         }
       if(is_tracking){await getPlacedDirection(posLatLng, destinationLatLng,showDialogue: false);}
 
-      var directionDetails = await Methods.obtainPlaceDirectionDetails(posLatLng, destinationLatLng!);
+      var directionDetails = await Methods.obtainPlaceDirectionDetails(posLatLng, destinationLatLng);
       if(directionDetails!=null)
         {
           setState(() {

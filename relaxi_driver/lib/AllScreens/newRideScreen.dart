@@ -30,7 +30,7 @@ class NewRideScreen extends StatefulWidget {
   _NewRideScreenState createState() => _NewRideScreenState();
 }
 
-class _NewRideScreenState extends State<NewRideScreen> {
+class _NewRideScreenState extends State<NewRideScreen>  with TickerProviderStateMixin{
   ////needed for drawing polylines/////
   Set<Marker> markers={};
   Set<Circle> circles= {};
@@ -39,8 +39,10 @@ class _NewRideScreenState extends State<NewRideScreen> {
   PolylinePoints polylinePoints=PolylinePoints();
   BitmapDescriptor? pickUpMarker;
   BitmapDescriptor? dropOffMarker;
+  BitmapDescriptor? pickUpPersonMarker;
   void _addCustomMapMarker() async{
     pickUpMarker = await BitmapDescriptor.fromAssetImage(ImageConfiguration(), 'assets/pickUp.png');
+    pickUpPersonMarker = await BitmapDescriptor.fromAssetImage(ImageConfiguration(), 'assets/rider.png');
     dropOffMarker= await BitmapDescriptor.fromAssetImage(ImageConfiguration(), 'assets/dropOff.png');
   }
   /////////////////////////////////////
@@ -108,8 +110,11 @@ class _NewRideScreenState extends State<NewRideScreen> {
   ////needed for updating ride details/////
   String status="accepted";
   String durationText ="";
+  String destanceText="";
+  double fareAmount=0.0;
   bool isRequestingDirection= false;
   bool is_tracking=false;
+  bool isExpanding=false;
   /////////////////////////////////////////
   ////needed for updating ride status/////
   bool is_arrived=false;
@@ -134,7 +139,9 @@ class _NewRideScreenState extends State<NewRideScreen> {
     final double _width= MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
-        child: Stack(children: [
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
         GoogleMap(
 
             mapType: MapType.normal,
@@ -154,177 +161,307 @@ class _NewRideScreenState extends State<NewRideScreen> {
               newRideGoogleMapController = controller;
               var current_LatLng= LatLng(currentPosition!.latitude,currentPosition!.longitude);
               var pickup_LatLng = widget.rideDetails!.pickUp;
-              await getPlacedDirection(current_LatLng, pickup_LatLng!);
+              await getPlacedDirection(current_LatLng, pickup_LatLng!, pickUp: true);
               getRideLiveLocUpdates();
             }
             ,
           ),
         Positioned(
-          bottom: 0.0,
-          child: Container(
-            height: _height/3,
-            width: _width,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [
-                    Colors.white,
-                    Colors.white,
-                    Colors.white.withOpacity(0)
-                  ],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter
-              ),
-            ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40.0,horizontal: 18.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              //crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: AnimatedSize(
+            duration: Duration(milliseconds: 300),
+            vsync: this,
+            child: Visibility(
+              visible: status=="accepted"?false:true,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
 
-                Expanded(
-                  child: Column(
-                    children: [
-                      //SizedBox(height: 20.0,),
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(widget.rideDetails!.rider_name!, style: GoogleFonts.comfortaa(fontSize: 18.0,fontWeight:FontWeight.bold,color: Colors.black,),),
-                            Expanded(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  TextButton(onPressed: (){
-                                    launch("tel://${widget.rideDetails!.rider_phone!}");
-                                  },
-                                  style: ButtonStyle(
-                                    overlayColor: MaterialStateProperty.all(grad1.withOpacity(0.4))
-                                  )
+                  Padding(
+                    padding: const EdgeInsets.only(right: 18.0,left:18.0,bottom: 20.0, top: 60.0),
+                    child: Container(
 
-                                  , child: Text(widget.rideDetails!.rider_phone!,
-                                          style: GoogleFonts.ubuntuMono(
-                                              fontSize: 16.0,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black,
-                                              decoration: TextDecoration.underline
-                                          ))),
-                                  SizedBox(width: 0.0,),
-                                  Icon(CupertinoIcons.device_phone_portrait,color: Colors.black,size: 20.0,),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(color: Colors.grey, blurRadius: 5.0)
+                        ],
+                        borderRadius: BorderRadius.circular(15.0)
                       ),
-                      SizedBox(height:2.0),
-                      Expanded(child: Text(durationText,style: TextStyle(fontSize: 14.0,color: grey),)),
-                    ],
-                  ),
-                ),
-
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Row(children:[Icon(CupertinoIcons.location_solid,color: grad1,size: 20.0,),SizedBox(width: 5.0),Text('From:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),), SizedBox(width: 5.0,),
-                          Expanded(child: Text(widget.rideDetails!.pickup_address!,overflow: TextOverflow.ellipsis,))],),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Row(children:[Icon(CupertinoIcons.location,color: grad1,size: 20.0,),SizedBox(width: 5.0),Text('To:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),), SizedBox(width: 5.0,),
-                          Expanded(child: Text(widget.rideDetails!.dropoff_address!,overflow: TextOverflow.ellipsis,))],),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 20.0),
-                    child: ElevatedButton(onPressed: ()async
-                    {
-                      String rideReqId= widget.rideDetails!.ride_request_id!;
-                      if(status=="accepted") {
-                        setState(() {
-                          is_tracking=true;
-                          btnTitle = "Arrive";
-                          btnBGColor = grad1;
-                          btnFGColor = Colors.black;
-                          status = "tracking";
-                        });
-                      }
-                        else if(status=="tracking") {
-                          setState(() {
-                            is_tracking=false;
-                            is_arrived = true;
-                            btnTitle="Start Ride";
-                            btnBGColor=Colors.purpleAccent;
-                            btnFGColor= Colors.white;
-                            status= "arrived";
-                          });
-
-                          newReqRef.child(rideReqId).child("status").set(status);
-                          showDialog(context: context,
-                              barrierDismissible: false,
-                              builder:(BuildContext context){
-                                return DialogueBox(message: "Getting drop off directions",);
-                              });
-                          await getPlacedDirection(widget.rideDetails!.pickUp!, widget.rideDetails!.dropOff!);
-                          Navigator.pop(context);
-                        }
-                        else if(status=="arrived") {
-
-                          setState(() {
-                            is_tracking=true;
-                            is_arrived = true;
-                            btnTitle="End Ride";
-                            btnBGColor=Colors.redAccent;
-                            btnFGColor= Colors.black;
-                            status= "onRide";
-                          });
-                          newReqRef.child(rideReqId).child("status").set(status);
-                          initTimer();
-
-                        }
-                        else if(status=="onRide") {
-                          is_tracking=false;
-                          endTheTrip();
-
-                        }
-
-                    }, child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Stack(
+                      alignment: Alignment.center,
                       children: [
-                        Text(
-                          btnTitle
+                        Positioned(
+                          top:10.0,
+                          right: 20.0,
+                          child: Visibility(
+                            visible: (status=="onRide")?true:false,
+                            child: TextButton(
+                            child: Icon(CupertinoIcons.rectangle_expand_vertical, color: Colors.black,),
+                            style: ButtonStyle(
+                              overlayColor: MaterialStateProperty.all(grad1.withOpacity(0.5))
+                            ),
+                            onPressed: (){
+                              setState(() {
+                                isExpanding= !isExpanding;
+                              });
+                            },
+
                         ),
-                        Icon(CupertinoIcons.car_detailed)
+                          )),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 18.0,left:18.0,bottom: 20.0, top: 50.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            //crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(widget.rideDetails!.rider_name!, style: GoogleFonts.lobsterTwo(fontSize: 24.0,fontWeight:FontWeight.bold,color: Colors.black,),),
+                              SizedBox(height:2.0),
+                              Text(durationText,style: TextStyle(fontSize: 14.0,color: grey),),
+                              IntrinsicHeight(
+                                child: Row(
+                                  children: [
+                                    VerticalDivider(width: 10.0,thickness:2.5,color: Colors.black,endIndent: 15.0,
+                                    indent: 5.0,),
+                                    Expanded(
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(2.0),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children:[
+                                              Icon(CupertinoIcons.location_solid,color: grad1,size: 20.0,),SizedBox(width: 5.0),Text('From:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),), SizedBox(width: 5.0,),
+                                              Expanded(child: Text(status=="tracking"?
+                                              'your location':widget.rideDetails!.pickup_address!,overflow: TextOverflow.clip,))],),
+                                          ),
+                                          SizedBox(height: 10.0,),
+                                          Padding(
+                                            padding: const EdgeInsets.all(2.0),
+                                            child: Row(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children:[Icon(CupertinoIcons.location,color: grad1,size: 20.0,),SizedBox(width: 5.0),Text('To:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),), SizedBox(width: 5.0,),
+                                              Expanded(child: Text(status=="tracking"?widget.rideDetails!.pickup_address!:
+                                              widget.rideDetails!.dropoff_address!,overflow: TextOverflow.clip,))],),
+
+                                          ),
+                                          SizedBox(height: 10.0,)
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Visibility(
+                                visible: isExpanding,
+                                child: IntrinsicHeight(
+                                  child: Row(
+                                    children: [
+                                      VerticalDivider(width: 15.0,thickness:2.5,color: Colors.black,endIndent: 1.0,
+                                        indent: 45.0,),
+                                      Expanded(
+                                        child: Column(
+                                          children: [
+                                            SizedBox(height: 10.0,),
+                                            Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text('Trip Fare',
+                                                style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16.0),),
+                                            ),
+                                            Divider(thickness: 2.0,endIndent: _width-150,color: grad1,),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text('💲 total estimated fares:'),
+                                                Text('${fareAmount.toString()} £', style: TextStyle(
+                                                  color: grad1,
+                                                  fontWeight: FontWeight.bold
+                                                ),),
+                                              ],
+                                            ),
+                                            SizedBox(height: 5.0,),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text('🚕 estimated distance:'),
+                                                Text(destanceText, style: TextStyle(
+                                                    color: grad1,
+                                                    fontWeight: FontWeight.bold
+                                                ),),
+
+                                              ],
+                                            ),
+                                            SizedBox(height: 5.0,),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text('⏱️ estimated Duration:'),
+                                                Text(durationText, style: TextStyle(
+                                                    color: grad1,
+                                                    fontWeight: FontWeight.bold
+                                                ),),
+                                            ],),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0,horizontal: 0.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex:3,
+                                      child: ElevatedButton(onPressed: ()async
+                                      {
+                                        String rideReqId= widget.rideDetails!.ride_request_id!;
+                                        if(status=="tracking") {
+                                            setState(() {
+                                              is_tracking=false;
+                                              is_arrived = true;
+                                              btnTitle="Start Ride";
+                                              //btnBGColor=Colors.purpleAccent;
+                                              btnFGColor= Colors.white;
+                                              status= "arrived";
+                                            });
+
+                                            newReqRef.child(rideReqId).child("status").set(status);
+                                            showDialog(context: context,
+                                                barrierDismissible: false,
+                                                builder:(BuildContext context){
+                                                  return DialogueBox(message: "Getting drop off directions",);
+                                                });
+                                            await getPlacedDirection(widget.rideDetails!.pickUp!, widget.rideDetails!.dropOff!);
+                                            Navigator.pop(context);
+                                          }
+                                          else if(status=="arrived") {
+
+                                            setState(() {
+                                              is_tracking=true;
+                                              is_arrived = true;
+                                              btnTitle="End Ride";
+                                              btnBGColor=Colors.redAccent;
+                                              btnFGColor= Colors.black;
+                                              status= "onRide";
+                                            });
+                                            newReqRef.child(rideReqId).child("status").set(status);
+                                            initTimer();
+
+                                          }
+                                          else if(status=="onRide") {
+                                            is_tracking=false;
+                                            endTheTrip();
+
+                                          }
+
+                                      }, child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            btnTitle
+                                          ),
+                                          Icon(CupertinoIcons.car_detailed)
+                                        ],
+                                      ),
+                                      style: ButtonStyle(
+                                        backgroundColor: MaterialStateProperty.all(btnBGColor),
+                                        foregroundColor:  MaterialStateProperty.all(btnFGColor),
+                                          fixedSize: MaterialStateProperty.all(Size(_width,60))
+                                        //elevation: MaterialStateProperty.all(is_arrived?0:null)
+                                      ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 5.0,),
+                                    Visibility(
+                                      visible: (status!="tracking")?false:true,
+                                      child: Expanded(
+                                        flex: 1,
+                                        child: ElevatedButton(onPressed: (){
+                                          launch("tel://${widget.rideDetails!.rider_phone!}");
+                                        },
+                                            style: ButtonStyle(
+                                                overlayColor: MaterialStateProperty.all(grad1.withOpacity(0.4)),
+                                              fixedSize: MaterialStateProperty.all(Size(_width,60)),
+                                              backgroundColor: MaterialStateProperty.all(Colors.black),
+
+                                            )
+
+                                            , child: Icon(CupertinoIcons.phone_solid,color: grad1,size: 30.0,)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(btnBGColor),
-                      foregroundColor:  MaterialStateProperty.all(btnFGColor),
-                      //elevation: MaterialStateProperty.all(is_arrived?0:null)
-                    ),
                     ),
                   ),
-                ),
-
-              ],
+                  Positioned(
+                    top:20,
+                    child:CircleAvatar(
+                     // backgroundColor: Colors.black,
+                      backgroundImage: AssetImage('assets/user.png'),
+                      radius: 40.0,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+        ),
+        Positioned(
+          bottom: 20.0,
+          left: 0,
+          right: 0,
+          child: AnimatedSize(
+          vsync: this,
+          duration: Duration (milliseconds: 300),
+          child: Visibility(
+            visible: (status=="accepted")?true:false,
+            child:Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0,vertical: 8.0),
+              child: ElevatedButton(onPressed: ()async
+              {
+                if(status=="accepted") {
+                  setState(() {
+                    is_tracking=true;
+                    btnTitle = "Pick Up";
+                    btnBGColor = grad1;
+                    btnFGColor = Colors.black;
+                    status = "tracking";
+                  });
+                }
+
+              },
+
+                 child: Text(
+                      'Go to Pick Up',textScaleFactor: 1.4,
+                  ),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(btnBGColor),
+                  foregroundColor:  MaterialStateProperty.all(btnFGColor),
+                  fixedSize: MaterialStateProperty.all(Size(_width,60))
+                  //elevation: MaterialStateProperty.all(is_arrived?0:null)
+                ),
+              ),
+            ),
           ),
-        )
+        ))
+
         ],),
       ),
     );
   }
-  Future<void> getPlacedDirection(LatLng pickUpLatLng, LatLng dropOffLatLng, {bool showDialogue=true}) async
+  Future<void> getPlacedDirection(LatLng pickUpLatLng, LatLng dropOffLatLng, {bool showDialogue=true, bool pickUp=false}) async
   {
     if(showDialogue) {
       showDialog(context: context,
@@ -333,7 +470,9 @@ class _NewRideScreenState extends State<NewRideScreen> {
               DialogueBox(message: "Getting Directions"));
     }
     var details = await Methods.obtainPlaceDirectionDetails(pickUpLatLng, dropOffLatLng);
-
+    setState(() {
+      fareAmount=Methods.calculateFares(details as DirectionDetails);
+    });
     if(showDialogue) {Navigator.pop(context);}
     /*print("This Is Encoded Points :: ");
     print(details!.encodedPoints);*/
@@ -397,7 +536,7 @@ class _NewRideScreenState extends State<NewRideScreen> {
       );
 
       Marker dropOffMarkerDefault = Marker(
-        icon: dropOffMarker!,
+        icon: pickUp?pickUpPersonMarker!:dropOffMarker!,
         markerId: MarkerId("dropOffMark"),
 
         position: dropOffLatLng,
@@ -477,6 +616,7 @@ class _NewRideScreenState extends State<NewRideScreen> {
         {
           setState(() {
             durationText= directionDetails.durationText;
+            destanceText= directionDetails.distanceText;
           });
         }
       isRequestingDirection = false;
@@ -502,7 +642,9 @@ class _NewRideScreenState extends State<NewRideScreen> {
     var directionalDetails= await Methods.obtainPlaceDirectionDetails(widget.rideDetails!.pickUp!, currentLatLng);
     Navigator.pop(context);
 
-    double fareAmount=Methods.calculateFares(directionalDetails as DirectionDetails);
+    setState(() {
+      fareAmount=Methods.calculateFares(directionalDetails as DirectionDetails);
+    });
     String rideReqId= widget.rideDetails!.ride_request_id!;
     newReqRef.child(rideReqId).child("fares").set(fareAmount.toString());
     newReqRef.child(rideReqId).child("status").set("ended");

@@ -48,6 +48,7 @@ DatabaseReference userRef= FirebaseDatabase.instance.reference().child("users");
 DatabaseReference driversRef= FirebaseDatabase.instance.reference().child("drivers");
 DatabaseReference newReqRef= FirebaseDatabase.instance.reference().child("Ride Requests");
 DatabaseReference tripReqRef= FirebaseDatabase.instance.reference().child("drivers").child(currentFirebaseUser!.uid).child("newRide");
+DatabaseReference currentDriverRef= FirebaseDatabase.instance.reference().child("drivers").child(currentFirebaseUser!.uid);
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
 
           primarySwatch: Colors.blue,
         ),
-        home: NotificationDialogue(),
+
         initialRoute: FirebaseAuth.instance.currentUser==null?LoginScreen.id_screen:MainScreen.id_screen,
         routes: {
          SplashScreen.id_screen:(context)=>SplashScreen(),

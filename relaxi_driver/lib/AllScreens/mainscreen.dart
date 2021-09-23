@@ -1,3 +1,5 @@
+import 'package:clay_containers/clay_containers.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:relaxi_driver/constants/all_cons.dart';
 import 'package:relaxi_driver/tabPages/earningsPage.dart';
@@ -52,50 +54,109 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         ],
       ),
       bottomNavigationBar: Container(
-        height: 60,
+        height: 80,
+
         decoration: BoxDecoration(
-          //borderRadius:BorderRadius.only(topRight: Radius.circular(60.0),topLeft: Radius.circular(60.0)),
           boxShadow: [
-            BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
+            BoxShadow(color: Colors.black.withOpacity(0.2), spreadRadius: 0, blurRadius: 20.0),
           ],
         ),
 
         child: ClipRRect(
-              borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(25.0),
-              topRight: Radius.circular(25.0),
+              borderRadius: BorderRadius.all(
+              Radius.circular(35.0)
+
               ),
           child:BottomNavigationBar(
+
             items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  label: "home",
-                  activeIcon: Icon(Icons.home)
+                  icon: ClayContainer(height:50,
+                    width: 50,
+                    borderRadius: 25.0,
+                    spread: 2.0,
+                    child: Center(child: Icon(CupertinoIcons.home)),
+                    curveType: CurveType.convex,
+                  ),
+                  label: ".",
+                  activeIcon: ClayContainer(emboss:true,
+                      height:50,
+                      width: 50,
+                      borderRadius: 25.0,
+                      child: Center(child: Icon(Icons.home, size: 30.0,color: grad1,)),
+                    spread: 1,
+                    curveType: CurveType.none,
+                    depth: 100,
+                  )
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.credit_card_rounded),
-                  label: "earnings",
-                  activeIcon: Icon(Icons.credit_card),
+                  icon: ClayContainer(height:50,
+                    width: 50,
+                    borderRadius: 25.0,
+                    spread: 2.0,
+                    child: Center(child: Icon(CupertinoIcons.creditcard)),
+                    curveType: CurveType.convex,
+                  ),
+                  label: ".",
+                  activeIcon: ClayContainer(emboss:true,
+                    height:50,
+                    width: 50,
+                    borderRadius: 25.0,
+                    child: Center(child: Icon(CupertinoIcons.creditcard_fill, size: 25.0,color: grad1,)),
+                    spread: 1,
+                    curveType: CurveType.none,
+                    depth: 100,
+                  )
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.star_border_outlined),
-                  label: "rating",
-                  activeIcon: Icon(Icons.star),
+                  icon: ClayContainer(height:50,
+                    width: 50,
+                    borderRadius: 25.0,
+                    spread: 2.0,
+                    child: Center(child:Icon(CupertinoIcons.star)),
+                    curveType: CurveType.convex,
+                  ),
+                  label: ".",
+                  activeIcon: ClayContainer(emboss:true,
+                    height:50,
+                    width: 50,
+                    borderRadius: 25.0,
+                    child: Center(child: Icon(CupertinoIcons.star_fill, size: 25.0,color: grad1,)),
+                    spread: 1,
+                    curveType: CurveType.none,
+                    depth: 100,
+                  )
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  label: "home",
-                  activeIcon:Icon(Icons.person),
+                  icon: ClayContainer(height:50,
+                      width: 50,
+                      borderRadius: 25.0,
+                      spread: 2.0,
+                      child: Center(child: Icon(Icons.person_outline)),
+                      curveType: CurveType.convex,
+                  ),
+                  label: ".",
+                  activeIcon:ClayContainer(emboss:true,
+                    height:50,
+                    width: 50,
+                    borderRadius: 25.0,
+                    color: Colors.grey[100],
+                    child: Center(child: Icon(CupertinoIcons.person_solid, size: 25.0,color: grad1,)),
+                    spread: 1,
+                    curveType: CurveType.none,
+                    depth: 100,
+                  )
                 )
               ],
-              showSelectedLabels: true,
+              iconSize: 20,
+              showSelectedLabels: false,
               selectedItemColor: grad1,
               showUnselectedLabels: false,
-              selectedLabelStyle: TextStyle(fontSize: 12.0,color: grad1),
               type: BottomNavigationBarType.fixed,
               unselectedItemColor: grey,
               currentIndex: selected_index,
               onTap: onTabClicked,
+
             ),
       ),)
     );

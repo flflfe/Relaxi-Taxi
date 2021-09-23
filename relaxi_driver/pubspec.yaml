@@ -95,6 +95,13 @@ flutter:
     - assets/car_mark2.png
     - assets/car_mark3.png
     - assets/pay_cash.png
+    - assets/user.png
+    - assets/rider.png
+    - assets/bad_driver.gif
+    - assets/good_driver.gif
+    - assets/very_bad_driver.gif
+    - assets/ok_driver.gif
+    - assets/very_good_driver.gif
 
 
   #   - images/a_dot_burr.jpeg

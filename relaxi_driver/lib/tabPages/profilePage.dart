@@ -104,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Divider(height: 10.0,thickness: 3.5,indent: _width/2-40,endIndent: _width/2-40,),
                       Text('Donia Esawi', style: GoogleFonts.pacifico(fontSize: 28.0,color: Colors.white),
                       ),
-                      Row(mainAxisAlignment: MainAxisAlignment.center,children: getStars(4.5, 20.0,showText: false)!,),
+                      Row(mainAxisAlignment: MainAxisAlignment.center,),
                       AnimatedDefaultTextStyle(
                         style: GoogleFonts.lobster(fontSize: 24.0),
                         duration: Duration(milliseconds: 3000),

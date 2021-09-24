@@ -44,6 +44,7 @@ Future<void> main() async{
   );
   runApp(MyApp());
 }
+
 DatabaseReference userRef= FirebaseDatabase.instance.reference().child("users");
 DatabaseReference driversRef= FirebaseDatabase.instance.reference().child("drivers");
 DatabaseReference newReqRef= FirebaseDatabase.instance.reference().child("Ride Requests");

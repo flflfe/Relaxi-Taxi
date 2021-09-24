@@ -53,7 +53,7 @@ class _RatingPageState extends State<RatingPage> {
                   children: [
                     Text('your average rate:',textScaleFactor: 1.2,),
                     SizedBox(height: 8.0,),
-                    Text(avgRate!.toString(), style: GoogleFonts.lobsterTwo(fontWeight: FontWeight.bold),textScaleFactor:4.0,),
+                    Text(avgRate.toString(), style: GoogleFonts.lobsterTwo(fontWeight: FontWeight.bold),textScaleFactor:4.0,),
                     Divider(height: 30.0,thickness: 0.5,color: Colors.grey,indent: _width/4,endIndent: _width/4,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -74,7 +74,7 @@ class _RatingPageState extends State<RatingPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(driverLabel!, style: GoogleFonts.lobster(color: txtColor, fontWeight: FontWeight.bold),textScaleFactor: 2.5,),
+                    Text(driverLabel, style: GoogleFonts.lobster(color: txtColor, fontWeight: FontWeight.bold),textScaleFactor: 2.5,),
                     Text(' Driver',style: GoogleFonts.lobster(color: Colors.black, ),textScaleFactor: 2.5,)
                   ],
                 ),

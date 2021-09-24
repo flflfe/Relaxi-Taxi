@@ -258,6 +258,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  flutter_speed_dial:
+    dependency: "direct main"
+    description:
+      name: flutter_speed_dial
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.4.0"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -532,6 +539,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.1"
+  speed_dial_fab:
+    dependency: "direct main"
+    description:
+      name: speed_dial_fab
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.1"
   splash_screen_view:
     dependency: "direct main"
     description:

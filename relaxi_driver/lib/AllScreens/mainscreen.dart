@@ -55,7 +55,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
       ),
       bottomNavigationBar: Container(
         height: 80,
-
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.2), spreadRadius: 0, blurRadius: 20.0),
@@ -75,7 +74,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     width: 50,
                     borderRadius: 25.0,
                     spread: 2.0,
-                    child: Center(child: Icon(CupertinoIcons.home)),
+
+                    child: Center(child: Icon(CupertinoIcons.home,color: grad1,)),
                     curveType: CurveType.convex,
                   ),
                   label: ".",
@@ -83,10 +83,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       height:50,
                       width: 50,
                       borderRadius: 25.0,
-                      child: Center(child: Icon(Icons.home, size: 30.0,color: grad1,)),
+                      child: Center(child: Icon(CupertinoIcons.house_alt_fill, size: 25.0,color: Colors.grey,)),
                     spread: 1,
                     curveType: CurveType.none,
-                    depth: 100,
+                    depth: 50,
+                    color: Colors.white.withOpacity(0.2),
                   )
                 ),
                 BottomNavigationBarItem(
@@ -94,7 +95,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     width: 50,
                     borderRadius: 25.0,
                     spread: 2.0,
-                    child: Center(child: Icon(CupertinoIcons.creditcard)),
+                    child: Center(child: Icon(CupertinoIcons.creditcard, color: grad1,)),
                     curveType: CurveType.convex,
                   ),
                   label: ".",
@@ -102,10 +103,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     height:50,
                     width: 50,
                     borderRadius: 25.0,
-                    child: Center(child: Icon(CupertinoIcons.creditcard_fill, size: 25.0,color: grad1,)),
+                    child: Center(child: Icon(CupertinoIcons.creditcard_fill, size: 25.0,color: grey,)),
                     spread: 1,
                     curveType: CurveType.none,
-                    depth: 100,
+                    depth: 50,
+                    color: Colors.white.withOpacity(0.2),
                   )
                 ),
                 BottomNavigationBarItem(
@@ -113,7 +115,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     width: 50,
                     borderRadius: 25.0,
                     spread: 2.0,
-                    child: Center(child:Icon(CupertinoIcons.star)),
+                    child: Center(child:Icon(CupertinoIcons.star,color: grad1,)),
+
                     curveType: CurveType.convex,
                   ),
                   label: ".",
@@ -121,10 +124,11 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     height:50,
                     width: 50,
                     borderRadius: 25.0,
-                    child: Center(child: Icon(CupertinoIcons.star_fill, size: 25.0,color: grad1,)),
+                    child: Center(child: Icon(CupertinoIcons.star_fill, size: 25.0,color: grey,)),
                     spread: 1,
                     curveType: CurveType.none,
-                    depth: 100,
+                    depth: 50,
+                    color: Colors.white.withOpacity(0.2),
                   )
                 ),
                 BottomNavigationBarItem(
@@ -132,7 +136,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                       width: 50,
                       borderRadius: 25.0,
                       spread: 2.0,
-                      child: Center(child: Icon(Icons.person_outline)),
+                      child: Center(child: Icon(Icons.person_outline,color: grad1,)),
                       curveType: CurveType.convex,
                   ),
                   label: ".",
@@ -141,10 +145,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     width: 50,
                     borderRadius: 25.0,
                     color: Colors.grey[100],
-                    child: Center(child: Icon(CupertinoIcons.person_solid, size: 25.0,color: grad1,)),
+                    child: Center(child: Icon(CupertinoIcons.person_solid, size: 25.0,color: Colors.grey,)),
                     spread: 1,
-                    curveType: CurveType.none,
-                    depth: 100,
+                    depth: 50,
+
                   )
                 )
               ],
@@ -156,7 +160,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
               unselectedItemColor: grey,
               currentIndex: selected_index,
               onTap: onTabClicked,
-
+              backgroundColor: Colors.grey[100],
             ),
       ),)
     );

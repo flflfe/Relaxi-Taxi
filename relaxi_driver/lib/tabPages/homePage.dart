@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:relaxi_driver/AllScreens/RegistrationScreen.dart';
 import 'package:relaxi_driver/AllWidgets/collectCash.dart';
 import 'package:relaxi_driver/Assistants/utils.dart';
 import 'package:relaxi_driver/Configurations/configMaps.dart';
+import 'package:relaxi_driver/DataHandler/appData.dart';
 import 'package:relaxi_driver/Models/drivers.dart';
 import 'package:relaxi_driver/Notifications/pushNotificationService.dart';
 import 'package:relaxi_driver/main.dart';
@@ -42,13 +44,8 @@ class _HomePageState extends State<HomePage> {
 
     print("Firebase token : $token");
   }
-
-
   Completer<GoogleMapController> _controllerGoogleMap = Completer();
-
   GoogleMapController? newGoogleMapController;
-
-
   var geoLocator = Geolocator();
 
 
@@ -66,17 +63,30 @@ class _HomePageState extends State<HomePage> {
     //String address = await Methods.searchCoordinateAddress(position, context);
     print("This is your Address :: ${position.longitude} & ${position.latitude}");
   }
-  bool isOnline=false;
 
+  void tryList()async{
+    await newReqRef.limitToFirst(1).once().then((value)
+        {
+
+          Map data = value.value;
+          print('\\\\\\\\\\\\\\\\\\\\${data.keys.first}');
+          //data.length
+          newReqRef.child(data.keys.first).remove();
+        });
+  }
   @override
-  void initState() {
+  void initState(){
     // TODO: implement initState
     super.initState();
+    //checkIfOnline();
+    //tryList();
     firebaseNotifcation = FirebaseNotifcation();
     handleAsync();
   }
+
   @override
   Widget build(BuildContext context) {
+    bool isOnline=Provider.of<AppData>(context).isDriverOnline;
     final double _height= MediaQuery.of(context).size.height;
     final double _width= MediaQuery.of(context).size.width;
     return SafeArea(
@@ -111,7 +121,7 @@ class _HomePageState extends State<HomePage> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0,left: 8.0),
                 child: RollingSwitch.icon(
-
+                  initialState: isOnline,
                   circularColor: Colors.white,
                   rollingInfoRight: const RollingIconInfo(
                     icon: Icons.close,
@@ -127,19 +137,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                   onChanged: (bool state ) {
                     if(state) {
-                      setState(() {
-                        isOnline=true;
-                      });
-
+                      Provider.of<AppData>(context, listen: false).updateDriverOnlineStatus(true);
                       makeDriverOnlineNow();
-                      getLiveLocationUpdates();
+                      getLiveLocationUpdates(isOnline: isOnline);
                       displayToastMsg("you are online now!", context);
                     }
                     else
                       {
-                        setState(() {
-                          isOnline=false;
-                        });
+                        Provider.of<AppData>(context, listen: false).updateDriverOnlineStatus(false);
                         makeDriverOfflineNow();
                         displayToastMsg("you're offline now", context);
 
@@ -228,7 +233,7 @@ class _HomePageState extends State<HomePage> {
       });
   }
 
-  void getLiveLocationUpdates()
+  void getLiveLocationUpdates({bool isOnline =true})
   {
     homeTabStreamSubscribtion = Geolocator.getPositionStream().listen((Position position) {
       currentPosition= position;

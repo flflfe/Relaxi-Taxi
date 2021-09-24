@@ -657,7 +657,7 @@ class _NewRideScreenState extends State<NewRideScreen>  with TickerProviderState
           );
         });
     saveEarnings(fareAmount);
-
+    saveTrip();
 
   }
   void saveEarnings(double fareAmount)
@@ -670,6 +670,21 @@ class _NewRideScreenState extends State<NewRideScreen>  with TickerProviderState
         }
       else{
         driversRef.child(currentFirebaseUser!.uid).child("earnings").set(fareAmount.toStringAsFixed(2));
+      }
+
+    });
+  }
+
+  void saveTrip()
+  {
+    driversRef.child(currentFirebaseUser!.uid).child("total_trips").once().then((DataSnapshot dataSnapshot) {
+      if(dataSnapshot.value!=null)
+      {
+        int total_trips= 1+int.parse(dataSnapshot.value.toString());
+        driversRef.child(currentFirebaseUser!.uid).child("total_trips").set(total_trips.toString());
+      }
+      else{
+        driversRef.child(currentFirebaseUser!.uid).child("total_trips").set(1.toString());
       }
 
     });

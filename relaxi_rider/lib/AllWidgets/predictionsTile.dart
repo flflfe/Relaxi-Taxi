@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/AllScreens/RegistrationScreen.dart';
 import 'package:flutter_app/Models/placePredictions.dart';
 import 'package:flutter_app/constants/all_cons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_app/AllScreens/searchScreen.dart' as search;
 class PredictionsTile extends StatelessWidget {
   final PlacePredictions placePredictions;
-
-  const PredictionsTile({Key? key, required this.placePredictions}) : super(key: key);
+  final String location;
+  const PredictionsTile({Key? key, required this.placePredictions, required this.location}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       child: TextButton(
         onPressed: (){
-        search.getPlaceAddressDetails(placePredictions.place_id, context);
+        search.getPlaceAddressDetails(placePredictions.place_id, context, place: location);
         },
         style: ButtonStyle(
           overlayColor: MaterialStateProperty.resolveWith<Color>(

@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:flutter_app/AllScreens/addHomeWorkScreen.dart';
 import 'package:flutter_app/AllScreens/loginScreen.dart';
+import 'package:flutter_app/AllScreens/profilePage.dart';
 import 'package:flutter_app/AllScreens/searchScreen.dart';
+import 'package:flutter_app/AllScreens/tripHistoryPage.dart';
 import 'package:flutter_app/AllWidgets/collectCash.dart';
 import 'package:flutter_app/AllWidgets/dialogueBox.dart';
 import 'package:flutter_app/AllWidgets/noDriverDialogue.dart';
@@ -10,11 +13,14 @@ import 'package:flutter_app/Assistants/mapKitAssistant.dart';
 import 'package:flutter_app/Assistants/utils.dart';
 import 'package:flutter_app/Configurations/configMaps.dart';
 import 'package:flutter_app/DataHandler/appData.dart';
+import 'package:flutter_app/Models/address.dart';
 import 'package:flutter_app/Models/directionDetails.dart';
 import 'package:flutter_app/Models/nearByAvailableDrivers.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart';
+import 'dart:math' as maths;
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +33,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:timelines/timelines.dart';
 import 'package:url_launcher/url_launcher.dart';
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -41,6 +48,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     target: LatLng(29.9481264, 30.9176703),
     zoom: 14.4746,
   );
+  String selecetdPlace='dropOff';
   List<LatLng>pLineCoordinates=[];
   Set<Polyline> polyLineSet= {};
   Set<Marker> markers={};
@@ -86,9 +94,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     initGeoFireListener();
 
   }
-  void displayDetailsContainer() async
+  void displayDetailsContainer({String place = 'dropOff'}) async
   {
-      await getPlacedDirection();
+
+      await getPlacedDirection(final_pos: place);
       setState(() {
         requestDriveHeight=0;
         searchContainerHeight= 0;
@@ -128,7 +137,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     setState(() {
       rideDetailsContainer=0;
       searchContainerHeight= 0;
-      driverDetailsHeight = 0.4;
+      driverDetailsHeight = 1;
       bottomPaddingofMap= 0.4;
       requestDriveHeight= 0;
       SearchIsSwitched= true;
@@ -142,6 +151,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   bool isEconomy=true;
   bool isLuxury=false;
   bool isTaxi=false;
+  bool isTokTok=false;
+  bool showDetails=false;
+  Address pickUp=new Address("","","",0.0,0.0);
+  Address dropOff=new Address("","","",0.0,0.0);
   double cash=0;
   DatabaseReference? rideRequestReference;
   List<NearByAvailableDrivers> availableDrivers=[];
@@ -152,16 +165,43 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   void initState()
   {
     // TODO: implement initState
+    getOnlineUser();
     super.initState();
     _addCustomMapMarker();
 
-    Methods.getCurrentOnlineUserInfo();
+  }
+  void getOnlineUser() async
+  {
+    showDialog(context: context,barrierDismissible: false,
+        builder: (BuildContext context)=> DialogueBox(message: "Loading Info..."));
+    await Methods.getCurrentOnlineUserInfo();
+    Navigator.pop(context);
+  }
+  void saveTrip()
+  {
+    Provider.of<AppData>(context,listen: false).updateTripCount();
+    userRef.child(userCurrentInfo.id!).child("total_trips").once().then((DataSnapshot dataSnapshot) {
+      if(dataSnapshot.value!=null)
+      {
+        int total_trips= 1+int.parse(dataSnapshot.value.toString());
+        userRef.child(userCurrentInfo.id!).child("total_trips").set(total_trips.toString());
+
+      }
+      else{
+        userRef.child(userCurrentInfo.id!).child("total_trips").set(1.toString());
+      }
+
+    });
   }
   void saveRideRequest()
   {
     rideRequestReference= FirebaseDatabase.instance.reference().child("Ride Requests").push();
-    var pickUp= Provider.of<AppData>(context,listen: false).pickUpLocation;
-    var dropOff= Provider.of<AppData>(context,listen: false).dropOffLocation;
+    setState(() {
+      pickUp= Provider.of<AppData>(context,listen: false).pickUpLocation;
+      dropOff= selecetdPlace=='dropOff'?Provider.of<AppData>(context,listen: false).dropOffLocation:
+      selecetdPlace=='home'?Provider.of<AppData>(context,listen: false).homeLocation!:
+      Provider.of<AppData>(context,listen: false).workLocation!;
+    });
 
     Map pickUpLocMap =
         {
@@ -180,10 +220,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       "pickUp":pickUpLocMap,
       "dropOff":dropOffLocMap,
       "created_at":DateTime.now().toString(),
-      "rider_name": userCurrentInfo.name,
-      "rider_phone":userCurrentInfo.phone,
+      "rider_name": userCurrentInfo.name!,
+      "rider_phone":userCurrentInfo.phone!,
       "pickup_address":pickUp.placeName,
-      "dropoff_address":dropOff.placeName
+      "dropoff_address":dropOff.placeName,
+      "duration":tripDirectionDetails.durationText,
+      "distance":tripDirectionDetails.distanceText
     };
     rideRequestReference!.set(rideInfoMap);
     rideStreamSubscription = rideRequestReference!.onValue.listen((event) async{
@@ -285,6 +327,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
         }
       if(statusRide =="ended")
       {
+        saveTrip();
+        userRef.child(userCurrentInfo.id!).child("history").child(rideRequestReference!.key).set(true);
         Geofire.stopListener();
         if(event.snapshot.value["fares"]!=null)
         {
@@ -460,111 +504,130 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       drawer: SafeArea(
         child: Container(
           color: Colors.white,
-          width: 0.7*_width,
           child: Drawer(
-            child: Stack(
-              children:[ ListView(
-                children: [
-                  //Header
+            elevation: 28,
+            child: Column(
+              children:[
+                Expanded(
+                child: ListView(
+                  children: [
+                    //Header
                   Container(
-
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [grad1, grad1,grad2],end:Alignment.topCenter,begin:Alignment.bottomCenter),
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0.25*_width),bottomRight: Radius.circular(0.25*_width)),
-                        boxShadow: <BoxShadow>[BoxShadow(color: grey.withOpacity(0.5), blurRadius: 3, spreadRadius: 0, offset: Offset(1.0,0)),]),
-                      child: Padding(
-                        padding: const EdgeInsets.all(25.0),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: CircleAvatar(
-                                radius: 50,
-                                backgroundColor: Colors.transparent,
-                                foregroundImage: NetworkImage(
-                                    "https://picsum.photos/200" //generate random images
-                                ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [grad1, grad1,grad2],end:Alignment.topCenter,begin:Alignment.bottomCenter),
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(0.25*_width),bottomRight: Radius.circular(0.25*_width)),
+                      boxShadow: <BoxShadow>[BoxShadow(color: grey.withOpacity(0.5), blurRadius: 3, spreadRadius: 0, offset: Offset(1.0,0)),]),
+                    child: Padding(
+                      padding: const EdgeInsets.all(25.0),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: CircleAvatar(
+                              radius: 45,
+                              backgroundColor: Colors.transparent,
+                              foregroundImage: NetworkImage(
+                                  "https://picsum.photos/200" //generate random images
                               ),
                             ),
-                            Text(
-                              userCurrentInfo.name,
-                              style: GoogleFonts.pacifico(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.normal,
-                                  color: Colors.white),
-                            ),
-                           Row(
-                             mainAxisAlignment: MainAxisAlignment.center,
-                             children: [
-                               Icon(Icons.phone_android,color: custom_grey,size: 15.0,),
-                               SizedBox(width: 2.0,),
-                               Text(userCurrentInfo.phone,
-                               style: TextStyle(color: custom_grey),)],)
-                          ],
+                          ),
+                          Text(
+                            userCurrentInfo.name!,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.pacifico(
+                                fontSize: 24,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.white),
+                          ),
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             Icon(Icons.phone_android,color: custom_grey,size: 15.0,),
+                             SizedBox(width: 2.0,),
+                             Text(userCurrentInfo.phone!,
+                             style: TextStyle(color: custom_grey),)],)
+                        ],
 
-                        ),
-                      )
-                    ,
-                  ),
-                  SizedBox(height: 20.0,),
-                  //list
-                  Divider(height: 2),
-                  ListTile(
-                    onTap: (){},
-                    onLongPress: (){},
-                    leading: Icon(Icons.history, color: grad1,),
-                    title: Text('My Trips',style: GoogleFonts.overlock(
-                      fontSize: 18,
+                      ),
+                    )
+                      ,
+                    ),
+                    SizedBox(height: 20.0,),
+                    //list
+                    Divider(height: 2),
+                    ListTile(
+                      onTap: ()async{
+                        showDialog(context: context,barrierDismissible: false,
+                            builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
+                        await Methods.retrieveHistoryInfo(context);
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, TripHistoryPage.id_screen);
+                      },
+                      leading: Icon(Icons.history, color: grad1,),
+                      title: Text('My Trips',style: GoogleFonts.overlock(
+                        fontSize: 16,
+                          color: custom_grey
+                      ),),
+
+                    ),
+                    Divider(height: 2),
+                    ListTile(
+                      onTap: ()async{
+
+                        print("total Trips:::::: ${userCurrentInfo.total_trips!}");
+                        showDialog(context: context,barrierDismissible: false,
+                            builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
+                        await Methods.getCurrentOnlineUserInfo();
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, ProfilePage.id_screen);
+
+                      },
+                      onLongPress: (){
+                      },
+                      leading: Icon(Icons.person_outline, color: grad1,),
+                      title: Text('My Profile',style: GoogleFonts.overlock(
+                          fontSize: 16,
+                          color: custom_grey
+                      ),),
+
+                    ),
+                    Divider(height: 2,),
+                    ListTile(
+                      onTap: (){},
+                      onLongPress: (){},
+                      leading: Icon(Icons.info_outlined, color: grad1,),
+                      title: Text('About',style: GoogleFonts.overlock(
+                          fontSize: 16,
+                          color: custom_grey
+                      ),),
+
+                    ),
+                    Divider(height: 2),
+                    ListTile(
+
+                      onTap: (){
+
+                        FirebaseAuth.instance.signOut();
+                        Navigator.pushNamedAndRemoveUntil(context, LoginScreen.id_screen, (route) => false);
+                      },
+                      onLongPress: (){},
+                      leading: Icon(Icons.logout, color: grad1,),
+                      title: Text('Sign Out',style: GoogleFonts.overlock(
+                          fontSize: 16,
                         color: custom_grey
-                    ),),
+                      ),),
 
-                  ),
-                  Divider(height: 2),
-                  ListTile(
-                    onTap: (){},
-                    onLongPress: (){},
-                    leading: Icon(Icons.person_outline, color: grad1,),
-                    title: Text('My Profile',style: GoogleFonts.overlock(
-                        fontSize: 18,
-                        color: custom_grey
-                    ),),
+                    ),
+                    Divider(height: 2),
+                    
 
-                  ),
-                  Divider(height: 2,),
-                  ListTile(
-                    onTap: (){},
-                    onLongPress: (){},
-                    leading: Icon(Icons.info_outlined, color: grad1,),
-                    title: Text('About',style: GoogleFonts.overlock(
-                        fontSize: 18,
-                        color: custom_grey
-                    ),),
-
-                  ),
-                  Divider(height: 2),
-                  ListTile(
-
-                    onTap: (){
-                      FirebaseAuth.instance.signOut();
-                      Navigator.pushNamedAndRemoveUntil(context, LoginScreen.id_screen, (route) => false);
-                    },
-                    onLongPress: (){},
-                    leading: Icon(Icons.logout, color: grad1,),
-                    title: Text('Sign Out',style: GoogleFonts.overlock(
-                        fontSize: 18,
-                      color: custom_grey
-                    ),),
-
-                  ),
-                  Divider(height: 2),
-                  
-
-                ],
+                  ],
+                ),
               ),
-                Positioned(
-                bottom: 20.0,
-                right: (0.7*_width)/2-0.5*0.35*_width,
-                    child: Image.asset('assets/logo_title.png',width: 0.35*_width,))
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Image.asset('assets/logo_title.png',width: 0.35*_width,),
+                )
               ]
             ),
           ),
@@ -630,7 +693,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                     child: Column(
                       children: [
                         //SizedBox(height:(((320/xd_height)*_height)/2)-80),
-                        Icons_Map(width: _width,locate: locatePosition),
+                        Icons_Map(width: _width,locate: locatePosition, getHomeWork: getHomeWork()!,),
                         SizedBox(height: 10.0,),
 
                         Hi_There(),
@@ -644,49 +707,66 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                           ],
                         ),
                         Divider(indent: 50.0,endIndent: 50.0,),
-    GestureDetector(
-    onTap: () async{
+                        GestureDetector(
+                        onTap: () async{
+                          showDialog(context: context,barrierDismissible: false,
+                              builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
+                          await getHomeWork();
+                          Navigator.pop(context);
+                          var res = await Navigator.push(context,
+                          MaterialPageRoute(builder: (context)=>SearchScreen()));
+                          if (res== "obtainDirection")
+                          {
+                           displayDetailsContainer();
+                          }
+                          else if(res=="obtainDirection_home")
+                            {
+                              displayDetailsContainer(place:'home');
+                              setState(() {
+                                selecetdPlace='home';
+                              });
+                            }
+                          else if(res=="obtainDirection_work")
+                            {
+                              displayDetailsContainer(place:'work');
+                              setState(() {
+                                selecetdPlace='work';
+                              });
+                            }
+                          },
+                        child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Container(
+                        decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                        color: yellow,
+                        width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(50)
+                        ),
+                        child: Padding(
+                        padding: const EdgeInsets.only(left: 5.0,right:20.0,),
+                        child: TextField(
 
-    var res = await Navigator.push(context,
-    MaterialPageRoute(builder: (context)=>SearchScreen()));
-    if (res== "obtainDirection")
-    {
-     displayDetailsContainer();
-    }
-    },
-    child: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-    child: Container(
-    decoration: BoxDecoration(
-    color: Colors.white,
-    border: Border.all(
-    color: yellow,
-    width: 1,
-    ),
-    borderRadius: BorderRadius.circular(50)
-    ),
-    child: Padding(
-    padding: const EdgeInsets.only(left: 5.0,right:20.0,),
-    child: TextField(
+                        cursorColor: grad1,
+                        decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.circle,size: 10.0,color: yellow,),
+                        prefixIconConstraints: BoxConstraints.tight(Size(25,25)),
+                        labelStyle: TextStyle(
+                        color: grey.withOpacity(0.8),
 
-    cursorColor: grad1,
-    decoration: InputDecoration(
-    prefixIcon: Icon(Icons.circle,size: 10.0,color: yellow,),
-    prefixIconConstraints: BoxConstraints.tight(Size(25,25)),
-    labelStyle: TextStyle(
-    color: grey.withOpacity(0.8),
+                        ),
+                        labelText: 'Where To?',
+                        border: InputBorder.none,
+                        ),
+                        enabled: false,
 
-    ),
-    labelText: 'Where To?',
-    border: InputBorder.none,
-    ),
-    enabled: false,
-
-    ),
-    ),
-    ),
-    ),
-    ),
+                        ),
+                        ),
+                        ),
+                        ),
+                        ),
                       ],
                     ),
                   ),
@@ -717,56 +797,96 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                         Expanded(
                           flex:6,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 4.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Container(
-                                  width: ((90/xd_width)*_width),
-                                  height: ((90/xd_height)*_height),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    border: Border.all(color: (isEconomy==true)?grad1:Colors.grey.shade400, width: (isEconomy==true)?2.5:1.0)
-                                  ),
-                                  child: TextButton(
-                                    style: ButtonStyle(
-
-                                    ),
-                                    onPressed: (){
-                                      setState(() {
-                                        isEconomy=true;
-                                        isLuxury=false;
-                                        isTaxi=false;
-                                      });
-                                    },
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(flex:2,child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                          child: Image.asset('assets/economyCar.png',),
-                                        )),
-                                        Expanded(child: Text('Economy',style: GoogleFonts.openSans(fontSize:12.0,
-                                            fontWeight: (isEconomy==true)?FontWeight.bold:FontWeight.normal,
-                                            color: (isEconomy==true)?grad1:grey),))
-                                      ],
-                                    ),
-                                  ),
-
-                                ),
-                              ),
-                                Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 0.0,vertical: 4.0),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.all(4.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Container(
-                                    width: ((90/xd_width)*_width),
-                                    height: ((90/xd_height)*_height),
+
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(20.0),
+                                      border: Border.all(color: (isEconomy==true)?grad1:Colors.grey.shade400, width: (isEconomy==true)?2.5:1.0)
+                                    ),
+                                    child: TextButton(
+                                      style: ButtonStyle(
+
+                                      ),
+                                      onPressed: (){
+                                        setState(() {
+                                          isEconomy=true;
+                                          isLuxury=false;
+                                          isTaxi=false;
+                                          isTokTok=false;
+
+                                        });
+                                      },
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Expanded(flex:2,child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                            child: Image.asset('assets/economyCar.png',width: 100.0,),
+                                          )),
+                                          Text('Economy',style: GoogleFonts.openSans(fontSize:16.0,
+                                              fontWeight: (isEconomy==true)?FontWeight.bold:FontWeight.normal,
+                                              color: (isEconomy==true)?grad1:grey),)
+                                        ],
+                                      ),
+                                    ),
+
+                                  ),
+                                ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(20.0),
+                                          border: Border.all(color: (isLuxury==true)?grad1:Colors.grey.shade400, width: (isLuxury==true)?2.5:1.0)
+                                      ),
+                                      child: TextButton(
+                                        style: ButtonStyle(
+
+                                        ),
+                                        onPressed: (){
+                                          setState(() {
+                                            isEconomy=false;
+                                            isLuxury=true;
+                                            isTaxi=false;
+                                            isTokTok=false;
+
+                                          });
+                                        },
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Expanded(flex:2,child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                              child: Image.asset('assets/luxuryCar.png',width: 100.0),
+                                            )),
+                                            Text('Luxury',style: GoogleFonts.openSans(fontSize:16.0,
+                                                fontWeight: (isLuxury==true)?FontWeight.bold:FontWeight.normal,
+                                                color: (isLuxury==true)?grad1:grey))
+                                          ],
+                                        ),
+                                      ),
+
+                                    ),
+                                  ),
+                                  Padding(padding: EdgeInsets.all(8.0),
+                                  child: Container(
+
                                     decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius: BorderRadius.circular(20.0),
-                                        border: Border.all(color: (isLuxury==true)?grad1:Colors.grey.shade400, width: (isLuxury==true)?2.5:1.0)
+                                        border: Border.all(color: (isTaxi==true)?grad1:Colors.grey.shade400, width: (isTaxi==true)?2.5:1.0)
                                     ),
                                     child: TextButton(
                                       style: ButtonStyle(
@@ -775,8 +895,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                                       onPressed: (){
                                         setState(() {
                                           isEconomy=false;
-                                          isLuxury=true;
-                                          isTaxi=false;
+                                          isLuxury=false;
+                                          isTaxi=true;
+                                          isTokTok=false;
+
                                         });
                                       },
                                       child: Column(
@@ -784,55 +906,57 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                                         children: [
                                           Expanded(flex:2,child: Padding(
                                             padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                            child: Image.asset('assets/luxuryCar.png',),
+                                            child: Image.asset('assets/taxiCar.png',width: 100.0),
                                           )),
-                                          Expanded(child: Text('Luxury',style: GoogleFonts.openSans(fontSize:12.0,
-                                              fontWeight: (isLuxury==true)?FontWeight.bold:FontWeight.normal,
-                                              color: (isLuxury==true)?grad1:grey)))
+                                          Text('Classic',style: GoogleFonts.openSans(fontSize:16.0,
+                                              fontWeight: (isTaxi==true)?FontWeight.bold:FontWeight.normal,
+                                              color: (isTaxi==true)?grad1:grey))
                                         ],
                                       ),
                                     ),
 
                                   ),
-                                ),
-                                Padding(padding: EdgeInsets.all(8.0),
-                                child: Container(
-                                  width: ((90/xd_width)*_width),
-                                  height: ((90/xd_height)*_height),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      border: Border.all(color: (isTaxi==true)?grad1:Colors.grey.shade400, width: (isTaxi==true)?2.5:1.0)
                                   ),
-                                  child: TextButton(
-                                    style: ButtonStyle(
+                                  Padding(padding: EdgeInsets.all(8.0),
+                                    child: Container(
+
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(20.0),
+                                          border: Border.all(color: (isTokTok==true)?grad1:Colors.grey.shade400,
+                                              width: (isTokTok==true)?2.5:1.0)
+                                      ),
+                                      child: TextButton(
+                                        style: ButtonStyle(
+
+                                        ),
+                                        onPressed: (){
+                                          setState(() {
+                                            isEconomy=false;
+                                            isLuxury=false;
+                                            isTaxi=false;
+                                            isTokTok=true;
+                                          });
+                                        },
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Expanded(flex:2,child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                              child: Image.asset('assets/toktok.png',width: 100.0),
+                                            )),
+                                            Text('TokTok',style: GoogleFonts.openSans(fontSize:16.0,
+                                                fontWeight: (isTokTok==true)?FontWeight.bold:FontWeight.normal,
+                                                color: (isTokTok==true)?grad1:grey))
+                                          ],
+                                        ),
+                                      ),
 
                                     ),
-                                    onPressed: (){
-                                      setState(() {
-                                        isEconomy=false;
-                                        isLuxury=false;
-                                        isTaxi=true;
-                                      });
-                                    },
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Expanded(flex:2,child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                          child: Image.asset('assets/taxiCar.png',),
-                                        )),
-                                        Expanded(child: Text('Taxi',style: GoogleFonts.openSans(fontSize:12.0,
-                                            fontWeight: (isTaxi==true)?FontWeight.bold:FontWeight.normal,
-                                            color: (isTaxi==true)?grad1:grey)))
-                                      ],
-                                    ),
-                                  ),
+                                  )
 
-                                ),
-                                )
-
-                            ],),
+                              ],),
+                            ),
                           ),
                         ),
                         Divider(height:0.0,),
@@ -862,7 +986,23 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                                     ),
                                   ),
                                   Expanded(
-                                    child: Text('Estimated fare: ${Methods.calculateFares(tripDirectionDetails)} £',style: GoogleFonts.ubuntuMono(
+                                    child: Text(
+                                      isTaxi?
+                                      'Estimated fares: '
+                                        '${Methods.calculateFares(tripDirectionDetails)+5}'
+                                        ' £':
+                                      isLuxury?
+                                      'Estimated fares: '
+                                          '${Methods.calculateFares(tripDirectionDetails)+15}'
+                                          ' £':
+                                      isEconomy?
+                                      'Estimated fares: '
+                                          '${Methods.calculateFares(tripDirectionDetails)}'
+                                          ' £':
+                                      'Estimated fares: '
+                                          '${Methods.calculateFares(tripDirectionDetails)-5}'
+                                          ' £'
+                                      ,style: GoogleFonts.ubuntuMono(
                                       fontSize: 14.0,
                                       color: Colors.grey.shade700
                                     ),),
@@ -885,9 +1025,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                               saveRideRequest();
                               availableDrivers = GeofireAssistant.nearByAvailableDriversList;
                               searchNearestDriver();
-                              },txt: "Send Request",),
+                              },txt: "Send Request",
+                              txtColor: Colors.black,),
                             ))
-
                       ],
                     ),
                   ),
@@ -914,107 +1054,151 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
               bottom: 0,
               right: 0,
               left: 0,
-              child: AnimatedSize(
-                vsync: this,
-                curve: Curves.elasticInOut,
+              child: AnimatedOpacity(
+                opacity: driverDetailsHeight,
+                curve: Curves.fastLinearToSlowEaseIn,
                 duration: Duration(milliseconds: 200),
-                child: Container(
-                    height:driverDetailsHeight*_height,
+                child: driverDetailsHeight==0?Container():Container(
+
                     decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(topLeft:Radius.circular(_width/7),
-                            topRight:Radius.circular(_width/7)),
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            color: Colors.grey,
-                            blurRadius: 15.0
-                          )
-                        ]
+                        gradient: LinearGradient(
+                            colors: [
+                              Colors.white,
+                              Colors.white,
+                              Colors.white,
+                              Colors.white,                              Colors.white,
+                              Colors.white,
+                              Colors.white.withOpacity(0.7),
+                              Colors.white.withOpacity(0)
+
+                            ],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter
+                        ),
 
                     ),
                     child: SingleChildScrollView(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            Row(
+                              children: [
+                                Expanded(child: Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.rotationY(maths.pi)
+                                ,child: Image.asset('assets/driver_car.png'))),
+                                Expanded(
+                                  flex:2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(driverCarDetails, style: TextStyle(color: grey, fontSize: 14),),
+                                      Text('Cap: $driverName', style: TextStyle(color: Colors.black, fontSize: 18.0),),
+                                      SizedBox(height: 10.0,),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(CupertinoIcons.phone_arrow_up_right,color:yellow),
+                                              SizedBox(width: 5.0,),
+                                              Text('$driverPhone', style:
+                                              GoogleFonts.balsamiqSans(color: Colors.black, fontSize: 16.0),
+                                              ),
+                                            ],
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: (){
+                                              launch("tel://$driverPhone");
+                                            },
+                                            child: Text('call driver', style: TextStyle(color: Colors.black),),
+                                            style: ButtonStyle(
+                                              backgroundColor: MaterialStateProperty.all(yellow)
+                                            ),
+
+                                          )
+                                        ],
+                                      ),
+
+
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                             Padding(
-                                padding: const EdgeInsets.all(12.0),
+                                padding: const EdgeInsets.all(8.0),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(driverArrivalStatus, style: GoogleFonts.pacifico(
-                                      fontSize: 24,
-                                      color: Colors.black,
-
-                                    ),
-
-                                    ),
+                                      fontSize: 24, color: Colors.black,), ),
                                     SizedBox(height: 5.0,),
-                                    SpinKitPouringHourGlassRefined(color: Colors.black,strokeWidth: 1.5,)
+                                    SpinKitPouringHourGlassRefined(color: yellow,strokeWidth: 1.5,)
                                   ],
                                 ),
                               ),
-                            Divider(height: 10.0,color: grad1.withOpacity(0.5), thickness: 1.5, indent: _width/8, endIndent: _width/8,),
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: _width/8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-
-                                mainAxisSize: MainAxisSize.min,
+                            AnimatedSize(duration: Duration(milliseconds: 300), vsync: this
+                            ,child: showDetails?Column(
                                 children: [
-                                  Text(driverCarDetails, style: TextStyle(color: grey, fontSize: 14),),
-                                  Text('Cap: $driverName', style: TextStyle(color: Colors.black, fontSize: 18.0),)
+                                  FixedTimeline.tileBuilder(
+                                    theme: TimelineThemeData(
+                                      color: grad1,
+                                      connectorTheme: ConnectorThemeData(
+                                          space: 35.0
+                                      ),
+
+                                    ),
+                                    builder: TimelineTileBuilder.connectedFromStyle(
+
+                                      connectionDirection: ConnectionDirection.before,
+                                      connectorStyleBuilder: (context, index) {
+                                        return ConnectorStyle.dashedLine;
+                                      },
+                                      nodePositionBuilder: (context, index)
+                                      {
+                                        return 0.0;
+                                      },
+                                      indicatorPositionBuilder: (context,index)
+                                      {
+                                        return 0.5;
+                                      },
+                                      contentsBuilder: (context,index)
+                                      {
+                                        return  (index==0)?
+                                          Text('From: ${pickUp.placeName}', style: GoogleFonts.balsamiqSans(
+                                            fontSize: 16.0,
+                                          ),)
+                                        : Text('To: ${dropOff.placeName}', style: GoogleFonts.balsamiqSans(
+                                          fontSize: 16.0,
+                                        ),)
+                                        ;
+                                      },
+                                      indicatorStyleBuilder: (context, index) {
+
+                                        return (index==1)?IndicatorStyle.dot:IndicatorStyle.outlined;
+                                      },
+                                      itemCount: 2,
+                                      itemExtent: 60.0
+                                    ),
+                                  ),
                                 ],
+
+                              ):Container(
+
                               ),
                             ),
-                            Divider(height: 10.0,color: grad1.withOpacity(0.5), thickness: 1.5, indent: _width/8, endIndent: _width/8,),
                             Padding(padding: EdgeInsets.symmetric(vertical: 10.0,horizontal: _width/8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton(onPressed: (){
-                                    launch("tel://$driverPhone");
-
-                                  }, child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Icon(Icons.call, size:30.0, color: grad1,),
-                                  ),style:
-                                    ButtonStyle(
-                                      side: MaterialStateProperty.all(BorderSide(color: Colors.black.withOpacity(0.5), width: 1.3)),
-                                      shape: MaterialStateProperty.all(CircleBorder(),),
-                                      overlayColor:  MaterialStateProperty.all(grad1.withOpacity(0.1))
-                                      //fixedSize: MaterialStateProperty.all(Size(50.0,50.0))
-                                    ),),
-                                ),
-                                Expanded(
-                                  child: OutlinedButton(onPressed: (){}, child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Icon(Icons.menu_open, size:30.0, color: grad1,),
-                                  ),style:
-                                  ButtonStyle(
-                                      side: MaterialStateProperty.all(BorderSide(color: Colors.black.withOpacity(0.5), width: 1.3)),
-                                      shape: MaterialStateProperty.all(CircleBorder(),),
-                                      overlayColor:  MaterialStateProperty.all(grad1.withOpacity(0.1))
-                                    //fixedSize: MaterialStateProperty.all(Size(50.0,50.0))
-                                  ),),
-                                ),
-                                Expanded(
-                                  child: OutlinedButton(onPressed: (){}, child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Icon(CupertinoIcons.xmark, size:30.0, color: grad1,),
-                                  ),style:
-                                  ButtonStyle(
-                                      side: MaterialStateProperty.all(BorderSide(color: Colors.black.withOpacity(0.5), width: 1.3)),
-                                      shape: MaterialStateProperty.all(CircleBorder(),),
-                                      overlayColor:  MaterialStateProperty.all(grad1.withOpacity(0.1))
-                                    //fixedSize: MaterialStateProperty.all(Size(50.0,50.0))
-                                  ),),
-                                )
-                              ],
-                            ),
+                            child: SubmitButton(onPressed: (){
+                              setState(() {
+                                showDetails=!showDetails;
+                              });
+                            },txt: showDetails==false?'Show Details':'HideDetails',
+                            txtColor: Colors.black,)
                             ),
 
                           ],
@@ -1031,12 +1215,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
 
     );
   }
-  Future<void> getPlacedDirection() async
+  Future<void> getPlacedDirection({final_pos='dropOff'}) async
   {
     var initialPos = Provider.of<AppData>(context, listen: false).pickUpLocation;
-    var finalPos = Provider.of<AppData>(context, listen: false).dropOffLocation;
+    var finalPos = (final_pos=='dropOff')?Provider.of<AppData>(context, listen: false).dropOffLocation:
+    (final_pos=='home')?Provider.of<AppData>(context, listen: false).homeLocation:
+    Provider.of<AppData>(context, listen: false).workLocation
+    ;
     var pickUpLatLng = LatLng(initialPos.latitude, initialPos.longitude);
-    var dropOffLatLng = LatLng(finalPos.latitude, finalPos.longitude);
+    var dropOffLatLng = LatLng(finalPos!.latitude, finalPos.longitude);
 
     showDialog(context: context ,
         barrierDismissible: false,
@@ -1298,6 +1485,40 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       });
 
   }
+  Future<void>? getHomeWork() async
+  {
+    await Methods.getCurrentOnlineUserInfo();
+    if(userCurrentInfo.work ==null || userCurrentInfo.home==null) {
+
+      if(userCurrentInfo.work != null ) {
+        await Provider.of<AppData>(context, listen: false).updateWorkLocation(
+            userCurrentInfo.work!);
+      }
+      else if(userCurrentInfo.work == null ){
+        Address notSet= new Address("not set", "not set", "not set",0.0,0.0);
+        await Provider.of<AppData>(context, listen: false).updateWorkLocation(notSet);
+      }
+      if(userCurrentInfo.home != null ) {
+        await Provider.of<AppData>(context, listen: false).updateHomeLocation(
+            userCurrentInfo.home!);
+      }
+      else if(userCurrentInfo.home == null ){
+        Address notSet= new Address("not set", "not set", "not set",0.0,0.0);
+        await Provider.of<AppData>(context, listen: false).updateHomeLocation(notSet);
+      }
+
+    }
+    else if(Provider.of<AppData>(context, listen: false).homeLocation == null)
+    {
+      await Provider.of<AppData>(context, listen: false).updateHomeLocation(
+          userCurrentInfo.home!);
+    }
+    else if(Provider.of<AppData>(context, listen: false).workLocation == null)
+    {
+      await Provider.of<AppData>(context, listen: false).updateWorkLocation(
+          userCurrentInfo.work!);
+    }
+  }
 }
 
 
@@ -1332,10 +1553,10 @@ class Hi_There extends StatelessWidget {
 
 class Icons_Map extends StatelessWidget {
   final VoidCallback locate;
-
+  final Future<void> getHomeWork;
   Icons_Map({
     Key? key,
-    required double width, required this.locate
+    required double width, required this.locate,required this.getHomeWork
   }) : _width = width, super(key: key);
 
   final double _width;
@@ -1348,12 +1569,24 @@ class Icons_Map extends StatelessWidget {
           width: 20,
         ),
 
-        MapButton(icon: Icon(Icons.home,color: grad1,),heroTag:"homeBtn",onPressed: (){}),
+        MapButton(icon: Icon(Icons.home,color: grad1,),heroTag:"homeBtn",onPressed: ()async{
+          showDialog(context: context,barrierDismissible: false,
+              builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
+          await getHomeWork;
+          Navigator.pop(context);
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context)=>AddHomeWorkScreen(home: true)));
+        }),
         SizedBox(
           width: 15,
         ),
-        MapButton(icon: Icon(Icons.work,color: grad1,),heroTag:"workBtn",onPressed: (){
-
+        MapButton(icon: Icon(Icons.work,color: grad1,),heroTag:"workBtn",onPressed: ()async{
+          showDialog(context: context,barrierDismissible: false,
+              builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
+          await getHomeWork;
+          Navigator.pop(context);
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context)=>AddHomeWorkScreen(home: false)));
         }),
 
 

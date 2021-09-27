@@ -1,11 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_app/Configurations/configMaps.dart';
 import 'package:flutter_app/DataHandler/appData.dart';
 import 'package:flutter_app/Models/AllUsers.dart';
 import 'package:flutter_app/Models/address.dart';
 import 'package:flutter_app/Models/directionDetails.dart';
+import 'package:flutter_app/Models/history.dart';
+import 'package:flutter_app/Models/placePredictions.dart';
+import 'package:flutter_app/main.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_app/Assistants/requests.dart';
 import 'package:provider/provider.dart';
@@ -74,14 +79,16 @@ class Methods {
     return double.parse(totalFare.toStringAsFixed(2));
   }
 
-  static void getCurrentOnlineUserInfo() async
+  static Future<void> getCurrentOnlineUserInfo() async
   {
-    firebaseUser = (await FirebaseAuth.instance.currentUser)!;
+
+    firebaseUser = await FirebaseAuth.instance.currentUser!;
     String userId = firebaseUser!.uid;
     DatabaseReference reference = FirebaseDatabase.instance.reference().child(
         "users").child(userId);
-    reference.once().then((DataSnapshot dataSnapshot) {
+    await reference.once().then((DataSnapshot dataSnapshot) {
       userCurrentInfo = Users.fromSnapshot(dataSnapshot);
+
     });
   }
 
@@ -102,7 +109,7 @@ class Methods {
     };
 
     Map notificationMap = {
-      'body': 'hey there! can u pick me up from ${pickup.placeName}?',
+      'body': 'hey there! can u pick me up?\n from ${pickup.placeName}?',
       'title': 'New Ride Request!'
     };
 
@@ -125,5 +132,91 @@ class Methods {
       body: jsonEncode(sendNotificationMap),
     );
   }
+
+  ///for image picker
+  static UploadTask? uploadImage(String destination, File file){
+    try {
+      final ref= FirebaseStorage.instance.ref(destination);
+      print('Successfully uploaded image');
+      return ref.putFile(file);
+    } on FirebaseException catch (e) {
+      // TODO
+      print('couldn\'t upload image: $e');
+      return null;
+    }
+  }
+  static Future<void> retrieveHistoryInfo (context) async
+  {
+    //retrieve trip history
+    await getCurrentOnlineUserInfo();
+    userRef.child(userCurrentInfo.id!).child('history').once().then((DataSnapshot snap){
+      if(snap.value == null)
+        {
+
+        }
+      else
+        {
+          Map <dynamic,dynamic> keys= snap.value;
+          List<String>keysList= [];
+          keys.forEach((key, value) {keysList.add(key);});
+          List<History> tripsList=[];
+          Provider.of<AppData>(context,listen: false).clearTripHistoryList();
+          for(String key in keysList)
+          {
+            rideRef.child(key).once().then((DataSnapshot snap) {
+              print(snap.value.toString());
+              if(snap.value!=null)
+              {
+                History history= History.fromSnapshot(snap);
+                print(history.dropoff_address.toString());
+                tripsList.add(history);
+                Provider.of<AppData>(context,listen: false).updateTripHistoryList(history);
+
+              }
+            });
+
+          }
+
+        }
+    });
+  }
+  static void updateHomeAddress (Address address)
+  {
+    //retrieve trip history
+    userRef.child(userCurrentInfo.id!).once().then((DataSnapshot snap){
+      if(snap.value != null)
+          {
+            Map<String, String> homeAddress=
+            {
+            "place_name":address.placeName,
+            "place_formatted_address":address.placeFormattedAddress,
+            "longitude":address.longitude.toString(),
+            "latitude":address.latitude.toString()
+            };
+            userRef.child(userCurrentInfo.id!).child('home').set(homeAddress);
+        }
+    });
+  }
+
+  static void updateWorkAddress (Address address)
+  {
+    //retrieve trip history
+    userRef.child(userCurrentInfo.id!).once().then((DataSnapshot snap){
+      if(snap.value != null)
+      {
+        Map<String, String> workAddress=
+        {
+          "place_name":address.placeName,
+          "place_formatted_address":address.placeFormattedAddress,
+          "longitude":address.longitude.toString(),
+          "latitude":address.latitude.toString()
+        };
+        userRef.child(userCurrentInfo.id!).child('work').set(workAddress);
+
+      }
+    });
+  }
+
+
 }
 

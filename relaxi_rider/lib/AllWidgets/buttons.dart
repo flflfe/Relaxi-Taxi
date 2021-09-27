@@ -30,9 +30,10 @@ class MapButton extends StatelessWidget {
 }
 
 class SubmitButton extends StatelessWidget {
+  Color? txtColor;
   final String txt;
   final VoidCallback onPressed;
-  const SubmitButton({Key? key, required this.onPressed,required this.txt}) : super(key: key);
+  SubmitButton({Key? key, required this.onPressed,required this.txt,this.txtColor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +66,16 @@ class SubmitButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(40)),
           primary: Colors.transparent,
-          onPrimary: Colors.white,
+          onPrimary: txtColor??Colors.white,
           shadowColor: Colors.transparent,
           onSurface: yellow,
 
 
         ),
-        child: Text(txt,style: GoogleFonts.montserrat(textStyle: TextStyle(fontSize: 20.0, ),fontWeight: FontWeight.w600),
-          textAlign: TextAlign.center,),),
+        child: Text(txt,style: GoogleFonts.montserrat(textStyle: TextStyle(fontSize:18.0, ),fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
+
+        ),),
     );
   }
 }

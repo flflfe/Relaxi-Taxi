@@ -5,9 +5,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:splash_screen_view/SplashScreenView.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
   static const String id_screen="build";
+
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
   @override
   Widget build(BuildContext context) {
     final double _height= MediaQuery.of(context).size.height;
@@ -21,7 +33,7 @@ class SplashScreen extends StatelessWidget {
             child: SplashScreenView(
               navigateRoute: FirebaseAuth.instance.currentUser==null?LoginScreen():MainScreen(),
               imageSrc: 'assets/logo_title.png',
-              duration: 8500,
+              duration: 500,
               pageRouteTransition: PageRouteTransition.SlideTransition,
               imageSize: (0.35*_width).toInt(),
               textType: TextType.ScaleAnimatedText,

@@ -217,10 +217,13 @@ void RegisterNewUser (BuildContext context)async
 if(firebaseUser != null)
   {
     //save user info to db
+
     Map userDataMap= {
       "name": nameTextEditingController.text.trim(),
       "email":emailTextEditingController.text.trim(),
-      "phone":phoneTextEditingController.text.trim()
+      "phone":phoneTextEditingController.text.trim(),
+      "total_trips":"0",
+
     };
     userRef.child(firebaseUser.uid).set(userDataMap);
     displayToastMsg("Successfully Created a New User !",context);

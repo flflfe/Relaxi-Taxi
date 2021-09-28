@@ -71,11 +71,9 @@ class _DialogueBoxState extends State<DialogueBox> {
 
                     Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: AnimatedTextKit(
-                        repeatForever: true,
-                        animatedTexts:[WavyAnimatedText(
+                      child: Text(
                           widget.message,
-                        textStyle: GoogleFonts.kaushanScript(
+                        style: GoogleFonts.pacifico(
                           textStyle: TextStyle(
                             fontSize: 24.0,
                             //fontWeight: FontWeight.w500,
@@ -83,7 +81,7 @@ class _DialogueBoxState extends State<DialogueBox> {
                             color: grad1,
                           )
                         ),
-                      ),]
+
                     ),),
                     SizedBox(height: 10,),
                     Row(

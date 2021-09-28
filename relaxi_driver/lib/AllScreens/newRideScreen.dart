@@ -8,13 +8,17 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:relaxi_driver/AllWidgets/collectCash.dart';
 import 'package:relaxi_driver/AllWidgets/dialogueBox.dart';
 import 'package:relaxi_driver/Assistants/mapKitAssistant.dart';
 import 'package:relaxi_driver/Assistants/methods.dart';
 import 'package:relaxi_driver/Assistants/utils.dart';
 import 'package:relaxi_driver/Configurations/configMaps.dart';
+import 'package:relaxi_driver/DataHandler/appData.dart';
 import 'package:relaxi_driver/Models/directionDetails.dart';
+import 'package:relaxi_driver/Models/drivers.dart';
+import 'package:relaxi_driver/Models/history.dart';
 import 'package:relaxi_driver/Models/rideDetails.dart';
 import 'package:relaxi_driver/constants/all_cons.dart';
 import 'package:relaxi_driver/main.dart';
@@ -649,15 +653,39 @@ class _NewRideScreenState extends State<NewRideScreen>  with TickerProviderState
     newReqRef.child(rideReqId).child("fares").set(fareAmount.toString());
     newReqRef.child(rideReqId).child("status").set("ended");
     rideScreenStreamSubscribtion!.cancel();
-    showDialog(context: context,
+    await showDialog(context: context,
         barrierDismissible: false,
         builder:(BuildContext context){
           return CollectCashDialogue(fareAmount: fareAmount,
           paymentMethod: widget.rideDetails!.payment_method,
           );
         });
+    showDialog(context: context,
+        barrierDismissible: false,
+        builder:(BuildContext context){
+          return DialogueBox(message: "Saving Trip",);
+        });
     saveEarnings(fareAmount);
     saveTrip();
+    updateProfile();
+    if(Provider.of<AppData>(context,listen: false).tripCards.length==0)
+      {await Methods.retrieveHistoryInfo(context);}
+    else
+      {
+        await newReqRef.child(rideReqId).once().then((DataSnapshot snap) async{
+          //print(snap.value.toString());
+          if(snap.value!=null)
+          {
+            History history= History.fromSnapshot(snap);
+            Provider.of<AppData>(context,listen: false).updateTripHistoryList(history);
+
+          }
+
+        });
+      }
+    Navigator.pop(context);
+    Navigator.pop(context);
+    Methods.enableHomeTabLocationLiveUpdate();
 
   }
   void saveEarnings(double fareAmount)
@@ -687,6 +715,16 @@ class _NewRideScreenState extends State<NewRideScreen>  with TickerProviderState
         driversRef.child(currentFirebaseUser!.uid).child("total_trips").set(1.toString());
       }
 
+    });
+  }
+
+  void updateProfile() async{
+    await driversRef.child(currentFirebaseUser!.uid).once().then((
+        DataSnapshot dataSnapshot) {
+      if(dataSnapshot.value!=null) {
+        Drivers driver= Drivers.fromSnapshot(dataSnapshot);
+        Provider.of<AppData>(context,listen: false).updateDriverDetails(driver);
+      }
     });
   }
 }

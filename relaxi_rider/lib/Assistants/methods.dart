@@ -149,7 +149,7 @@ class Methods {
   {
     //retrieve trip history
     await getCurrentOnlineUserInfo();
-    userRef.child(userCurrentInfo.id!).child('history').once().then((DataSnapshot snap){
+    await userRef.child(userCurrentInfo.id!).child('history').once().then((DataSnapshot snap) async{
       if(snap.value == null)
         {
 
@@ -163,14 +163,14 @@ class Methods {
           Provider.of<AppData>(context,listen: false).clearTripHistoryList();
           for(String key in keysList)
           {
-            rideRef.child(key).once().then((DataSnapshot snap) {
+            await rideRef.child(key).once().then((DataSnapshot snap) async{
               print(snap.value.toString());
               if(snap.value!=null)
               {
                 History history= History.fromSnapshot(snap);
                 print(history.dropoff_address.toString());
                 tripsList.add(history);
-                Provider.of<AppData>(context,listen: false).updateTripHistoryList(history);
+                await Provider.of<AppData>(context,listen: false).updateTripHistoryList(history);
 
               }
             });

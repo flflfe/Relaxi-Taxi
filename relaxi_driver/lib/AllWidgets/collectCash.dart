@@ -6,6 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:relaxi_driver/AllScreens/RegistrationScreen.dart';
 import 'package:relaxi_driver/AllScreens/newRideScreen.dart';
+import 'package:relaxi_driver/AllWidgets/dialogueBox.dart';
 import 'package:relaxi_driver/Assistants/methods.dart';
 import 'package:relaxi_driver/Configurations/configMaps.dart';
 import 'package:relaxi_driver/Models/rideDetails.dart';
@@ -81,8 +82,6 @@ class CollectCashDialogue extends StatelessWidget {
                     Padding(padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 20.0),
                       child: ElevatedButton(onPressed: (){
                         Navigator.pop(context);
-                        Navigator.pop(context);
-                        Methods.enableHomeTabLocationLiveUpdate();
                       },
 
                         style: ButtonStyle(

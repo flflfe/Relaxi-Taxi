@@ -52,6 +52,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   url_launcher: ^6.0.10
+  auto_size_text_pk: ^3.0.0
+  sliding_up_panel: ^2.0.0+1
+  timelines: ^0.1.0
 
 
 dev_dependencies:
@@ -105,6 +108,7 @@ flutter:
     - assets/ok_driver.gif
     - assets/very_good_driver.gif
     - assets/profile_bg.png
+    - assets/driver_bg.png
 
 
   #   - images/a_dot_burr.jpeg

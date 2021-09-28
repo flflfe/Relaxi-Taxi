@@ -1,182 +1,104 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:relaxi_driver/AllWidgets/tripCard.dart';
+import 'package:relaxi_driver/Assistants/methods.dart';
+import 'package:relaxi_driver/DataHandler/appData.dart';
+import 'package:relaxi_driver/Models/history.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:auto_size_text_pk/auto_size_text_pk.dart';
 import 'package:relaxi_driver/constants/all_cons.dart';
-
+import 'package:provider/provider.dart';
+import 'package:timelines/timelines.dart';
 class EarningsPage extends StatefulWidget {
   const EarningsPage({Key? key}) : super(key: key);
+  static const String id_screen="history";
 
   @override
   _EarningsPageState createState() => _EarningsPageState();
 }
 
 class _EarningsPageState extends State<EarningsPage> {
-  bool? is_expanded=false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    List<History> trips=Provider.of<AppData>(context).tripCards;
     final double _height= MediaQuery.of(context).size.height;
     final double _width= MediaQuery.of(context).size.width;
-    double? height_top= _height/2 - 50.0;
+    return Scaffold(
+      backgroundColor: Colors.white,
 
-    return SafeArea(
-      child: Stack(
-        //overflow: Overflow.visible,
-        children: [
-          Positioned(
-
-              child:Container(
-                height: _height/2+60,
-
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [grad1,grad1,grad2],
-                    end: Alignment.topLeft,
-                    begin: Alignment.bottomRight
-                  )
+      body: SafeArea(
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 10.0),
+              child: ListView.builder(
+                  itemBuilder: (context,index){
+                    if(index==0)
+                    {
+                      return Column(
+                        children: [
+                          SizedBox(height: 90.0,),
+                          TripCard(height: _height,trip: trips[index],)
+                        ],
+                      );
+                    }
+                    return TripCard(height: _height,trip: trips[index],);
+                  },
+                  //separatorBuilder: separatorBuilder,
+                  itemCount: trips.length),
+            ),
+            Positioned(
+              child: Container(
+                width: _width,
+                height: 80,
+                decoration: new BoxDecoration(
+                    image: DecorationImage(
+                        image: ExactAssetImage('assets/driver_bg.png',),
+                        fit: BoxFit.cover
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                          color: Colors.grey.shade400,blurRadius: 10.0
+                      )
+                    ]
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(top:_height/4-100),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Text('Total Earnings:',style: GoogleFonts.pacifico(fontSize: 28.0,color: Colors.white),),
-                      SizedBox(height: 5.0,),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                        children:[Text('235.35',style: GoogleFonts.lobster(fontSize: 24.0, color: Colors.black),),
-                  SizedBox(width: 0.0,),
-                  Icon(CupertinoIcons.money_pound, color: Colors.black,)]
-                      ),
-                      SizedBox(height: 20.0,),
+                      Positioned(left: 0.0,
+                          child: IconButton(onPressed: (){
+                            Navigator.pop(context);
+                          },icon: Icon(CupertinoIcons.back))),
+                      Positioned(
 
-                      Text('Total Trips:',style: GoogleFonts.pacifico(fontSize: 28.0,color: Colors.white),),
-                      SizedBox(height: 5.0,),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children:[Text('20',style: GoogleFonts.lobster(fontSize: 24.0, color: Colors.black),),
-                            SizedBox(width: 10.0,),
-                            Icon(CupertinoIcons.car_detailed, color: Colors.black,)]
-                      )
+                        child: Center(
+                          child: Text('TRIPS HISTORY', style: GoogleFonts.amaticSc(fontWeight: FontWeight.bold,color: Colors.black ),
+                            textScaleFactor: 2.0,),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              )
-          ),
-          AnimatedPositioned(
-              onEnd: (){},
-              top: is_expanded!?0:height_top,
-              child: Container(
-                height: is_expanded!?_height:_height-height_top,
-                width: _width,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(topLeft:is_expanded!?Radius.circular(0.0):Radius.circular(50.0),
-                        topRight:is_expanded!?Radius.circular(0.0):Radius.circular(50.0))
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                        top:20,
-                        right: 30,
-                        child: OutlinedButton(
-                          onPressed: (){
-                            setState(() {
-                              is_expanded=!is_expanded!;
-                            });
-                          },
-                          style: ButtonStyle(
-                              foregroundColor: MaterialStateProperty.all(grey)
-                          ),
-                          child: Text(is_expanded!?'Shrink':'Expand',),
-                        )),
-                    Positioned(
+              ),
+            ),
 
-                      child: Padding(
-                      padding: EdgeInsets.only(top:80.0,right: 18.0,left: 18.0,bottom: 90.0),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: 20,
-                        itemBuilder: (context, index){return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-
-                            decoration: BoxDecoration(
-                                border: Border.all(color: grad1,width: 0.5),
-                              borderRadius: BorderRadius.circular(15.0),
-                            boxShadow: <BoxShadow>[
-                              BoxShadow(
-                                color: grad1.withOpacity(0.1),
-                                blurRadius:5.0,
-
-                              )
-                            ]),
-
-                            child: Card(
-                              elevation: 0.0,
-                              child: ListTile(
-                                  onTap: (){
-
-                                  },
-                                  title: Padding(
-                                    padding: const EdgeInsets.all(4.0),
-                                    child: Stack(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(CupertinoIcons.car_detailed,color: Colors.black,),
-                                            SizedBox(width: 10.0,),
-                                            Text('Trip ${index+1}'),
-                                          ],
-
-                                        ),
-                                  Positioned(
-                                    top: 5.0,right: 0.0,
-                                      child:Row(children:[Text('15',style: GoogleFonts.jua(fontSize: 16.0,color: Colors.black),),SizedBox(width: 0.0,),Icon(CupertinoIcons.money_pound,size: 20.0,)]))
-
-
-                                          ],
-                                    ),
-                                  ),
-                                subtitle: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Expanded(child: Column(
-
-                                        mainAxisSize: MainAxisSize.min,
-
-                                        children: [
-                                          Row(children:[Icon(CupertinoIcons.location_solid,color: grad1,size: 15.0,),
-                                            SizedBox(width: 5.0),Text('From:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
-                                            SizedBox(width: 5.0,),Expanded(child: Text('Lorem Ipsum is simply dummy text of the printing and typesetting industry',overflow: TextOverflow.ellipsis,))],),
-                                          SizedBox(height: 5.0,),
-                                          Row(children:[Icon(CupertinoIcons.location,color: grad1,size: 15.0,),SizedBox(width: 5.0),Text('To:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),), SizedBox(width: 5.0,),
-                                            Expanded(child: Text('Lorem Ipsum is simply dummy text of the printing and typesetting industry',overflow: TextOverflow.ellipsis,))],),
-
-                                        ],
-                                      ),)
-                                    ],
-                                  ),
-                                ),
-                                  ),
-
-                            ),
-                          ),
-                        );},
-                      ),
-                    ))
-                  ],
-                ),
-              ), duration: Duration(milliseconds: 700),
-          curve: Curves.easeInOutQuint,)
-
-
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+

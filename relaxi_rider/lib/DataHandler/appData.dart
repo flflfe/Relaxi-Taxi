@@ -39,8 +39,8 @@ class AppData extends ChangeNotifier
    notifyListeners();
 
  }
- void updateTripHistoryList(History trip)
- {
+ Future<void> updateTripHistoryList(History trip)
+ async {
        tripCards.add(trip);
        notifyListeners();
 

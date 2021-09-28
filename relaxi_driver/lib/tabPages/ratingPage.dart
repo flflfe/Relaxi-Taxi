@@ -2,6 +2,10 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:relaxi_driver/AllWidgets/dialogueBox.dart';
+import 'package:relaxi_driver/DataHandler/appData.dart';
+import 'package:relaxi_driver/Models/drivers.dart';
 import 'package:relaxi_driver/constants/all_cons.dart';
 import 'package:relaxi_driver/main.dart';
 
@@ -13,7 +17,7 @@ class RatingPage extends StatefulWidget {
 }
 
 class _RatingPageState extends State<RatingPage> {
-  String pheobe="very_good_driver";
+  String pheobe="";
   double avgRate = 0;
   Color txtColor = Colors.black;
   String driverLabel="";
@@ -22,7 +26,12 @@ class _RatingPageState extends State<RatingPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getRate();
+    waitToGetRate();
+
+  }
+  void waitToGetRate() async
+  {
+    await _getRate();
   }
   @override
   Widget build(BuildContext context) {
@@ -53,7 +62,7 @@ class _RatingPageState extends State<RatingPage> {
                   children: [
                     Text('your average rate:',textScaleFactor: 1.2,),
                     SizedBox(height: 8.0,),
-                    Text(avgRate.toString(), style: GoogleFonts.lobsterTwo(fontWeight: FontWeight.bold),textScaleFactor:4.0,),
+                    Text(avgRate.toStringAsFixed(2), style: GoogleFonts.lobsterTwo(fontWeight: FontWeight.bold),textScaleFactor:4.0,),
                     Divider(height: 30.0,thickness: 0.5,color: Colors.grey,indent: _width/4,endIndent: _width/4,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -71,7 +80,7 @@ class _RatingPageState extends State<RatingPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top:40.0, bottom: 30.0,left: 20,right: 20.0),
-                child: Row(
+                child:driverLabel==""?Container(): Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(driverLabel, style: GoogleFonts.lobster(color: txtColor, fontWeight: FontWeight.bold),textScaleFactor: 2.5,),
@@ -90,7 +99,7 @@ class _RatingPageState extends State<RatingPage> {
                         )
                       ]
                   ),
-                  child: Image.asset('assets/$pheobe.gif', width: _width/2,),
+                  child: (pheobe=="")?Container():Image.asset('assets/$pheobe.gif', width: _width/2,),
                 ),
               )
 
@@ -133,7 +142,7 @@ class _RatingPageState extends State<RatingPage> {
     }
 
   }
-  void _getRate()async
+  Future<void> _getRate()async
   {
     await currentDriverRef.once().then((DataSnapshot dataSnapshot) {
       if(dataSnapshot.value!= null)
@@ -193,6 +202,10 @@ class _RatingPageState extends State<RatingPage> {
           }
 
           getStars(avgRate, 30.0 ,showText: false);
+          Drivers driver= Provider.of<AppData>(context,listen: false).driverDetails!;
+          driver.avg_rating=avgRate;
+          Provider.of<AppData>(context,listen: false).updateDriverDetails(driver);
+
         }
       else
         {
@@ -200,6 +213,7 @@ class _RatingPageState extends State<RatingPage> {
             avgRate = 0;
           });
         }
+
     });
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:relaxi_driver/AllScreens/RegistrationScreen.dart';
 import 'package:relaxi_driver/AllScreens/carInfoScreen.dart';
@@ -30,6 +32,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> main() async{
+  runZonedGuarded(() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   currentFirebaseUser = FirebaseAuth.instance.currentUser;
@@ -43,6 +46,9 @@ Future<void> main() async{
     sound: true,
   );
   runApp(MyApp());
+  }, (Object error, StackTrace stack) {
+
+  });
 }
 
 DatabaseReference userRef= FirebaseDatabase.instance.reference().child("users");

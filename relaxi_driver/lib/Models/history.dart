@@ -54,23 +54,23 @@ class History {
         car_details = dataSnapshot.value['car_details'].toString();
       }
       else
-      {
-        car_details = "not set";
-      }
+        {
+          car_details = "not set";
+        }
       if(dataSnapshot.value['duration']!=null) {
         duration = dataSnapshot.value['duration'].toString();
       }
       else
-      {
-        duration="unDefined";
-      }
+        {
+          duration="unDefined";
+        }
       if(dataSnapshot.value['distance']!=null) {
         distance = dataSnapshot.value['distance'].toString();
       }
-      else
-      {
-        distance="unDefined";
-      }
+    else
+    {
+      distance="unDefined";
+    }
     }
   }
 }

@@ -13,6 +13,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:relaxi_driver/Models/drivers.dart';
+import 'package:relaxi_driver/Models/history.dart';
+import 'package:relaxi_driver/main.dart';
 class Methods
 {
   static Future<String> searchCoordinateAddress(Position position,context) async
@@ -71,15 +74,16 @@ class Methods
     return  double.parse(totalFare.toStringAsFixed(2));
 
   }
-  static void getCurrentOnlineUserInfo() async
+  static Future<void> getCurrentOnlineUserInfo(context) async
   {
-    firebaseUser = (await FirebaseAuth.instance.currentUser)!;
-    String userId = firebaseUser!.uid;
-    DatabaseReference reference= FirebaseDatabase.instance.reference().child("users").child(userId);
-    reference.once().then((DataSnapshot dataSnapshot) {
-      userCurrentInfo = Users.fromSnapshot(dataSnapshot);
-    });
+    firebaseUser = await FirebaseAuth.instance.currentUser!;
+    String driverId = firebaseUser!.uid;
+    DatabaseReference reference= FirebaseDatabase.instance.reference().child("drivers").child(driverId);
+    await reference.once().then((DataSnapshot dataSnapshot) async{
+        driversInfo = Drivers.fromSnapshot(dataSnapshot);
+        await Provider.of<AppData>(context,listen: false).updateDriverDetails(driversInfo!);
 
+    });
   }
 
   ///for image picker
@@ -108,5 +112,41 @@ class Methods
     Geofire.setLocation(currentFirebaseUser!.uid, currentPosition!.latitude,currentPosition!.longitude);
 
   }
+
+  static Future<void> retrieveHistoryInfo (context) async
+  {
+    //retrieve trip history
+    await driversRef.child(currentFirebaseUser!.uid).child('history').once().then((DataSnapshot snap) async{
+      if(snap.value == null)
+      {
+
+      }
+      else
+      {
+        Map <dynamic,dynamic> keys= snap.value;
+        List<String>keysList= [];
+        keys.forEach((key, value) {keysList.add(key);});
+        print(keysList.toString());
+        await Provider.of<AppData>(context,listen: false).clearTripHistoryList();
+        for(String key in keysList)
+        {
+          await newReqRef.child(key).once().then((DataSnapshot snap) async{
+            //print(snap.value.toString());
+            if(snap.value!=null)
+            {
+              History history= History.fromSnapshot(snap);
+              Provider.of<AppData>(context,listen: false).updateTripHistoryList(history);
+
+            }
+
+          });
+
+        }
+
+
+      }
+    });
+  }
+
 }
 

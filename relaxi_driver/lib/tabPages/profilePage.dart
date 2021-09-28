@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
+
 import 'dart:math' as math;
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -11,9 +11,13 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:provider/provider.dart';
+import 'package:relaxi_driver/AllWidgets/dialogueBox.dart';
 import 'package:relaxi_driver/AllWidgets/speedDialCustom.dart';
 import 'package:relaxi_driver/Assistants/methods.dart';
 import 'package:relaxi_driver/Configurations/configMaps.dart';
+import 'package:relaxi_driver/DataHandler/appData.dart';
+import 'package:relaxi_driver/Models/drivers.dart';
 import 'package:relaxi_driver/constants/all_cons.dart';
 import 'package:relaxi_driver/main.dart';
 import 'ratingPage.dart';
@@ -24,7 +28,7 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin{
   UploadTask? task;
   String? imageUrl;
   File? image;
@@ -66,15 +70,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getDriverDetails();
   }
+
   @override
   Widget build(BuildContext context) {
     final double _height= MediaQuery.of(context).size.height;
     final double _width= MediaQuery.of(context).size.width;
     double? height_top= _height/2 - 50.0;
-
-
+    Drivers driver= Provider.of<AppData>(context).driverDetails!;
     return SafeArea(
       child: Column(
         //overflow: Overflow.visible,
@@ -122,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     width: _width/2,
                     child: Center(
                       child: Text(
-                      name,overflow: TextOverflow.fade, style: GoogleFonts.lobster(color: grad1),textAlign: TextAlign.center,
+                        driver.name!,overflow: TextOverflow.fade, style: GoogleFonts.lobster(color: grad1),textAlign: TextAlign.center,
                       textScaleFactor: 1.7,
                 ),
                     ),
@@ -135,23 +138,19 @@ class _ProfilePageState extends State<ProfilePage> {
                   transform: Matrix4.rotationX(math.pi),
                   child: SpeedDialFabWidget(
                     secondaryIconsList: [
-                      Icons.rate_review,
-                      Icons.edit,
                       Icons.logout,
                     ],
                     secondaryIconsText: [
-                      "review our app",
-                      "edit password",
+
                       "log out",
 
                     ],
                     secondaryIconsOnPress: [
                           () => {},
-                          () => {},
-                          () => {},
+
                     ],
                     secondaryBackgroundColor: Colors.grey[900],
-                    secondaryForegroundColor: Colors.white,
+                    secondaryForegroundColor: grad1,
                     primaryBackgroundColor: Colors.grey[900],
                     primaryForegroundColor: grad1,
                   ),
@@ -173,85 +172,127 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 40.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text('Personal Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.1,),
-                      Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: 0.6*_width,),
+                      Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: _width/3,indent: _width/3,),
                       SizedBox(height: 5.0,),
-                      Text('phone number:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(Icons.phone, size: 14.0,color: grad1),
-                          SizedBox(width: 5.0,),
-                          Text(phoneNumber, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
-                      ),
-                      SizedBox(height: 5.0,),
-                      Text('Email Address:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(Icons.email, size: 14.0,color: grad1,),
-                          SizedBox(width: 5.0,),
-                          Text(currentFirebaseUser!.email!, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
+                      Container(
+                        padding: EdgeInsets.only(left: 10.0, ),
+                        decoration: BoxDecoration(
+                            border:Border(
+                                left: BorderSide(color: grey.withOpacity(0.4), width: 2.0,)
+                            )
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment:MainAxisAlignment.center,
+                          children: [
+                            Text('phone number:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(Icons.phone, size: 14.0,color: grad1),
+                                SizedBox(width: 5.0,),
+                                Text(driver.phone!, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                            SizedBox(height: 5.0,),
+                            Text('Email Address:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(Icons.email, size: 14.0,color: grad1,),
+                                SizedBox(width: 5.0,),
+                                Text(currentFirebaseUser!.email!, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 20.0,),
                       Text('Car Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.1,),
-                      Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: 0.6*_width,),
+                      Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: _width/3,indent: _width/3,),
                       SizedBox(height: 5.0,),
-                      Text('Car Model:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(CupertinoIcons.car_detailed, size: 14.0,color: grad1),
-                          SizedBox(width: 5.0,),
-                          Text(car_model, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
-                      ),
-                      Text('Car Number:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(CupertinoIcons.number_square_fill, size: 14.0,color: grad1),
-                          SizedBox(width: 5.0,),
-                          Text(car_number, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
-                      ),
-                      SizedBox(height: 5.0,),
-                      Text('Car Color:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(Icons.color_lens, size: 14.0,color: grad1,),
-                          SizedBox(width: 5.0,),
-                          Text(car_color, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
+                      Container(
+                          padding: EdgeInsets.only(left: 10.0, ),
+                          decoration: BoxDecoration(
+                              border:Border(
+                                  left: BorderSide(color: grey.withOpacity(0.4), width: 2.0,)
+                              )
+                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Car Model:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(CupertinoIcons.car_detailed, size: 14.0,color: grad1),
+                                SizedBox(width: 5.0,),
+                                Text(driver.car_model!, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                            Text('Car Number:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(CupertinoIcons.number_square_fill, size: 14.0,color: grad1),
+                                SizedBox(width: 5.0,),
+                                Text(driver.car_number!, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                            SizedBox(height: 5.0,),
+                            Text('Car Color:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(Icons.color_lens, size: 14.0,color: grad1,),
+                                SizedBox(width: 5.0,),
+                                Text(driver.car_color!, style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 20.0,),
                       Text('Trips Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.1,),
-                      Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: 0.6*_width,),
+                      Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: _width/3,indent: _width/3,),
                       SizedBox(height: 5.0,),
-                      Text('Total completed trips:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(CupertinoIcons.location_fill, size: 14.0,color: grad1),
-                          SizedBox(width: 5.0,),
-                          Text(total_trips.toString(), style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
-                      ),
-                      Text('Average Rate:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(CupertinoIcons.star_fill, size: 14.0,color: grad1),
-                          SizedBox(width: 5.0,),
-                          Text(avgRate.toString(), style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
-                      ),
-                      SizedBox(height: 5.0,),
-                      Text('Total Earnings:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
-                      Row(
-                        children: [
-                          Icon(CupertinoIcons.creditcard_fill, size: 14.0,color: grad1,),
-                          SizedBox(width: 5.0,),
-                          Text(earnings.toString(), style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
-                        ],
+                      Container(
+                        padding: EdgeInsets.only(left: 10.0, ),
+                        decoration: BoxDecoration(
+                            border:Border(
+                                left: BorderSide(color: grey.withOpacity(0.4), width: 2.0,)
+                            )
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Total completed trips:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(CupertinoIcons.location_fill, size: 14.0,color: grad1),
+                                SizedBox(width: 5.0,),
+                                Text(driver.total_trips!.toString(), style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                            Text('Average Rate:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(CupertinoIcons.star_fill, size: 14.0,color: grad1),
+                                SizedBox(width: 5.0,),
+                                Text(driver.avg_rating!.toStringAsFixed(2), style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                            SizedBox(height: 5.0,),
+                            Text('Total Earnings:',style: GoogleFonts.montserrat(fontWeight: FontWeight.w400, color: grey)),
+                            Row(
+                              children: [
+                                Icon(CupertinoIcons.creditcard_fill, size: 14.0,color: grad1,),
+                                SizedBox(width: 5.0,),
+                                Text(driver.earnings!.toStringAsFixed(2), style: GoogleFonts.ubuntuMono(fontWeight: FontWeight.w400, color: Colors.black)),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -267,127 +308,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _getDriverDetails()async
-  {
-    await currentDriverRef.once().then((DataSnapshot dataSnapshot)
-    {
-      if(dataSnapshot.value!= null) {
-        if (dataSnapshot.value["avg_rating"] == null) {
-          setState(() {
-            avgRate = 5.0;
-          });
-        }
-        else if (dataSnapshot.value["avg_rating"] != null) {
-          setState(() {
-            avgRate = double.parse(dataSnapshot.value["avg_rating"].toString());
-          });
-        }
 
-        if (dataSnapshot.value["total_trips"] == null) {
-          setState(() {
-            total_trips = 0;
-          });
-        }
-        else if (dataSnapshot.value["total_trips"] != null) {
-          setState(() {
-            total_trips =
-                int.parse(dataSnapshot.value["total_trips"].toString());
-          });
-        }
-
-        if (dataSnapshot.value["phone"] == null) {
-          setState(() {
-            phoneNumber = 'not defined';
-          });
-        }
-        else if (dataSnapshot.value["phone"] != null) {
-          setState(() {
-            phoneNumber = dataSnapshot.value["phone"].toString();
-          });
-        }
-
-        if (dataSnapshot.value["name"] == null) {
-          setState(() {
-            name = 'undefined';
-          });
-        }
-        else if (dataSnapshot.value["name"] != null) {
-          setState(() {
-            name = dataSnapshot.value["name"].toString();
-          });
-        }
-
-        if (dataSnapshot.value["earnings"] == null) {
-          setState(() {
-            earnings = 0.0;
-          });
-        }
-        else if (dataSnapshot.value["earnings"] != null) {
-          setState(() {
-            earnings = double.parse(dataSnapshot.value["earnings"].toString());
-          });
-        }
-
-        if (dataSnapshot.value["carDetails"] == null) {
-          setState(() {
-            car_number = 'not defined';
-            car_model = 'not defined';
-            car_color = 'not defined';
-          });
-        }
-        else if (dataSnapshot.value["carDetails"] != null) {
-          if (dataSnapshot.value["carDetails"]["car_number"] != null) {
-            setState(() {
-              car_number =
-                  dataSnapshot.value["carDetails"]["car_number"].toString();
-            });
-          }
-          else {
-            setState(() {
-              car_number = 'undefined';
-            });
-          }
-
-          if (dataSnapshot.value["carDetails"]["car_model"] != null) {
-            setState(() {
-              car_model =
-                  dataSnapshot.value["carDetails"]["car_model"].toString();
-            });
-          }
-          else {
-            setState(() {
-              car_model = 'undefined';
-            });
-          }
-
-          if (dataSnapshot.value["carDetails"]["car_number"] != null) {
-            setState(() {
-              car_color =
-                  dataSnapshot.value["carDetails"]["car_color"].toString();
-            });
-          }
-          else {
-            setState(() {
-              car_color = 'undefined';
-            });
-          }
-        }
-      }
-      else
-      {
-        setState(() {
-          avgRate = 0;
-          total_trips= 0;
-          phoneNumber = 'not defined';
-          name = 'not defined';
-          car_color='not defined';
-          car_model='not defined';
-          car_number='not defined';
-          earnings =0;
-        });
-      }
-    });
-  }
 
 }
 

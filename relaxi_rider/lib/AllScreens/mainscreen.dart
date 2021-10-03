@@ -225,7 +225,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       "pickup_address":pickUp.placeName,
       "dropoff_address":dropOff.placeName,
       "duration":tripDirectionDetails.durationText,
-      "distance":tripDirectionDetails.distanceText
+      "distance":tripDirectionDetails.distanceText,
+      "rider_gender":userCurrentInfo.gender,
     };
     rideRequestReference!.set(rideInfoMap);
     rideStreamSubscription = rideRequestReference!.onValue.listen((event) async{
@@ -526,8 +527,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                             child: CircleAvatar(
                               radius: 45,
                               backgroundColor: Colors.transparent,
-                              foregroundImage: NetworkImage(
-                                  "https://picsum.photos/200" //generate random images
+                              foregroundImage: AssetImage(
+                                userCurrentInfo.gender! =='Female'?'assets/female_rider.png':'assets/male_rider.png'
                               ),
                             ),
                           ),

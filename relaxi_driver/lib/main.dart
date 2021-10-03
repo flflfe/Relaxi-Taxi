@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:relaxi_driver/AllScreens/RegistrationScreen.dart';
-import 'package:relaxi_driver/AllScreens/carInfoScreen.dart';
 import 'package:relaxi_driver/AllScreens/loginScreen.dart';
 import 'package:relaxi_driver/AllScreens/mainscreen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:relaxi_driver/AllScreens/phoneVerification.dart';
 import 'package:relaxi_driver/AllScreens/splashScreen.dart';
 import 'package:relaxi_driver/AllWidgets/dialogueBox.dart';
 import 'package:relaxi_driver/Configurations/configMaps.dart';
@@ -16,6 +16,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:relaxi_driver/Notifications/notificationDialogue.dart';
+import 'package:relaxi_driver/constants/all_cons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'AllScreens/introOnBoardingScreen.dart';
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title
@@ -27,15 +31,53 @@ FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-
   print('A bg message just showed up :  ${message.messageId}');
 }
+Future<bool?> hasCompletedProfile() async
+{
+  currentFirebaseUser= FirebaseAuth.instance.currentUser;
+  if(currentFirebaseUser!=null)
+    {
+      bool is_completed=await FirebaseDatabase.instance.reference().child("drivers").child(currentFirebaseUser!.uid).once().then((snap) {
+        if(snap.value!=null)
+          {
+            if(snap.value["phone"]==null)
+              {
+                return false;
+              }
+            else
+              {
+                print('doneee');
 
+                return true;
+              }
+          }
+        else{
+          return false;
+        }
+      });
+      return is_completed;
+    }
+  return false;
+}
+Future<bool> isFirstTime() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var isFirstTime = prefs.getBool('first_time');
+  if (isFirstTime != null && !isFirstTime) {
+    prefs.setBool('first_time', false);
+    return false;
+  } else {
+    return true;
+  }
+}
 Future<void> main() async{
   runZonedGuarded(() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   currentFirebaseUser = FirebaseAuth.instance.currentUser;
+  hasCompletedProf=await hasCompletedProfile();
+  isFirstTimeBool=await isFirstTime();
+  print(hasCompletedProf);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
@@ -56,27 +98,45 @@ DatabaseReference driversRef= FirebaseDatabase.instance.reference().child("drive
 DatabaseReference newReqRef= FirebaseDatabase.instance.reference().child("Ride Requests");
 DatabaseReference tripReqRef= FirebaseDatabase.instance.reference().child("drivers").child(currentFirebaseUser!.uid).child("newRide");
 DatabaseReference currentDriverRef= FirebaseDatabase.instance.reference().child("drivers").child(currentFirebaseUser!.uid);
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  _MyAppState createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+  void isCompleted()async
+  {
+    hasCompletedProf=await hasCompletedProfile();
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
+  @override
+  Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create:(context)=>AppData(),
       child: MaterialApp(
         title: 'Relaxi Drivers',
         theme: ThemeData(
-
           primarySwatch: Colors.blue,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbColor: MaterialStateProperty.all(grad1),
+            trackColor: MaterialStateProperty.all(grey),
+          )
         ),
 
-        initialRoute: FirebaseAuth.instance.currentUser==null?LoginScreen.id_screen:MainScreen.id_screen,
+        initialRoute: SplashScreen.id_screen,
         routes: {
          SplashScreen.id_screen:(context)=>SplashScreen(),
-          RegistrationScreen.id_screen: (context)=> RegistrationScreen(),
+         RegistrationScreen.id_screen: (context)=> RegistrationScreen(),
          LoginScreen.id_screen: (context)=> LoginScreen(),
          MainScreen.id_screen: (context)=> MainScreen(),
-         CarInfoScreen.idScreen: (context)=>CarInfoScreen()
+         PhoneVerification.id_screen:(context)=>PhoneVerification(),
+         IntroOnBoardingScreen.id_screen:(context)=>IntroOnBoardingScreen()
        },
         debugShowCheckedModeBanner: false,
       ),

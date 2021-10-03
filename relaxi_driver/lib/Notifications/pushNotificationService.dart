@@ -143,7 +143,7 @@ class FirebaseNotifcation {
           ////////////////////////////////////////////////
           String rider_name = dataSnapshot.value["rider_name"];
           String rider_phone = dataSnapshot.value["rider_phone"];
-
+          String rider_gender= dataSnapshot.value["rider_gender"];
           RideDetails rideDetails = RideDetails();
           rideDetails.ride_request_id=rideReqId;
           rideDetails.pickup_address=pickUpAddress;
@@ -153,10 +153,10 @@ class FirebaseNotifcation {
           rideDetails.payment_method= paymentMethod;
           rideDetails.rider_name=rider_name;
           rideDetails.rider_phone=rider_phone;
+          rideDetails.rider_gender=rider_gender;
           print("Information :: ");
           print(rideDetails.pickup_address);
           print(rideDetails.dropoff_address);
-
           showDialog(context: context,barrierDismissible: false,
               builder:(BuildContext contexr)=> NotificationDialogue(rideDetails: rideDetails,));
 

@@ -9,3 +9,4 @@ final Color grad2=Color(0xffF7FF00);
 final Color shadow_yellow=Color(0xffFFFF82);
 final Color baseColor = Color(0xFFF2F2F2);
 final Color custom_grey=Color(0xff444b54);
+final Color splash=Color(0xffFFD400);

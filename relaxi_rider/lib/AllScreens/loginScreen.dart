@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/AllScreens/RegistrationScreen.dart';
 import 'package:flutter_app/AllScreens/mainscreen.dart';
 import 'package:flutter_app/AllWidgets/dialogueBox.dart';
+import 'package:flutter_app/AllWidgets/errorDialogue.dart';
 import 'package:flutter_app/constants/all_cons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,13 +14,24 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_app/AllWidgets/buttons.dart';
 import '../main.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
 
   LoginScreen({Key? key}) : super(key: key);
   static const String id_screen="login";
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailTextEditingController = TextEditingController();
 
   TextEditingController passwordTextEditingController = TextEditingController();
+
+
+  bool started_typing_email=false;
+  bool started_typing_password=false;
+  bool showPass=false;
   @override
   Widget build(BuildContext context) {
     final double _height= MediaQuery.of(context).size.height;
@@ -39,113 +51,189 @@ class LoginScreen extends StatelessWidget {
       }
     }
     return Scaffold(
-    body: SafeArea(
-      child: SingleChildScrollView(
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 50.0,vertical: 20.0),
           child: Center(
             child: Column(
-              mainAxisSize:MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-
-                Image.asset('assets/logo_image.png',width: 0.25*_width,),
-                SizedBox(height: 0.15*_height,),
-                Center(
+                Expanded(child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Image.asset('assets/logo_image.png',width: 0.35*_width,),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Welcome Back!",
+                            style: GoogleFonts.pacifico(
+                                fontWeight: FontWeight.w500,
+                                color:grad1),
+                            textScaleFactor: 2.0,
+                          ),
+                          Text(
+                            " Login as a rider",
+                            style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black.withOpacity(0.5),),
+                            textAlign: TextAlign.start,
+                            textScaleFactor: 1.0,
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                )),
+                Expanded(
+                  flex: 2,
                   child: Column(
-                    mainAxisSize:MainAxisSize.min,
-
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                  Text(
-                    "Login as a Rider",
-                    style: GoogleFonts.montserrat(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w500,
-                        color: grey),
-                  ),
-                  SizedBox(height: 25.0),
-                  TextField(
-                    controller: emailTextEditingController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.email_outlined, color: yellow,),
-                      labelText: "Email Address",
-                      labelStyle: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        textStyle: TextStyle(color: grey ),
-                      ),
-                      hintStyle: GoogleFonts.montserrat(
-                        fontSize: 10.0,
-                        textStyle: TextStyle(color: grey ),),
-                    ),
-                  ),
-                  SizedBox(height: 25.0),
-                  TextField(
-                    controller: passwordTextEditingController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      icon: Icon(Icons.vpn_key_outlined, color: yellow,),
-                      labelText: "Password",
-                      labelStyle: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        textStyle: TextStyle(color: grey ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextField(
 
-                      ),
-                      hintStyle: GoogleFonts.montserrat(
-                        fontSize: 10.0,
-                        textStyle: TextStyle(color: grey ),),
-                    ),
-                  ),
-                  SizedBox(height: (55/xd_height)*_height,),
-                  SubmitButton(onPressed: ValidateInput,txt: "Sign In",),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Doesn't have an account?",
-                        style: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                            color: grey),
+                              controller: emailTextEditingController,
+                              keyboardType: TextInputType.emailAddress,
+                              onTap: (){
+                                setState(() {
+                                  started_typing_email=true;
+                                  started_typing_password=false;
+                                });
+                              },
+                              onSubmitted: (val){
+                                setState(() {
+                                  started_typing_email=false;
+                                });
+                              },
+                              cursorHeight: 25,
+                              cursorColor: grad1,
+                              style: GoogleFonts.montserrat(fontSize: 16.0),
+                              decoration: InputDecoration(
+                                icon: Icon(Icons.email_outlined, color: yellow,),
+                                labelText: "Email Address",
+                                labelStyle: GoogleFonts.montserrat(
+                                  textStyle: TextStyle(color: grey.withOpacity(0.5) ),
+                                ),
+                                enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.grey.shade300,width: 1.5)
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(color: grad1,width: 2.0)
+                                ),
+                                filled: true,
+                                fillColor: started_typing_email&&!started_typing_password?
+                                Colors.yellow.withOpacity(0.1):Colors.transparent,
+                                suffixIcon: started_typing_email&&!started_typing_password?
+                                GestureDetector(
+                                    onTap: (){
+                                      emailTextEditingController.clear();
+                                    },
+                                    child: Icon(CupertinoIcons.xmark,color: grad1,size: 20.0,)
+                                ):null,
+                              ),
+                            ),
+                            SizedBox(height: 15.0),
+                            TextField(
+                              controller: passwordTextEditingController,
+                              obscureText: !showPass,
+                              onTap: (){
+                                setState(() {
+                                  started_typing_password=true;
+                                  started_typing_email=false;
+                                });
+                              },
+                              onSubmitted: (val){
+                                setState(() {
+                                  started_typing_password=false;
+                                  showPass=false;
+                                });
+                              },
+                              style: GoogleFonts.montserrat(fontSize: 16.0),
+                              cursorHeight: 25,
+                              cursorColor: grad1,
+                              decoration: InputDecoration(
+                                  icon: Icon(Icons.vpn_key_outlined, color: yellow,),
+                                  labelText: "Password",
+                                  labelStyle: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(color: grey.withOpacity(0.5) ),
+                                  ),
+                                  suffixIcon: started_typing_password&&!started_typing_email?
+                                  GestureDetector(
+                                      onTap: (){
+                                        setState(() {
+                                          showPass=!showPass;
+                                        });
+                                      },
+                                      child: Icon(showPass?CupertinoIcons.eye_slash:CupertinoIcons.eye,color: grad1,size: 20.0,)
+                                  ):null,
+                                  filled: true,
+                                  fillColor: !started_typing_email&&started_typing_password?
+                                  Colors.yellow.withOpacity(0.1):Colors.transparent,
+                                  enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.grey.shade300,width: 1.5)
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: grad1,width: 2.0)
+                                  )
 
-                      ),
-                      TextButton(
-                        onPressed: (){
-                          Navigator.pushNamedAndRemoveUntil(context, RegistrationScreen.id_screen, (route) => false);
-                        },
-                        child:Text('Sign Up',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal,
-                            fontStyle: FontStyle.italic,
-                            decoration: TextDecoration.underline,
-                            color: grad1),
+                              ),
+                            ),
+                          ],
                         ),
-
                       ),
-                    ],
-                  )
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SubmitButton(onPressed: ValidateInput,txt: "Sign In",),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "New user?",
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.black.withOpacity(0.6)),
+                                ),
+                                TextButton(
+                                  onPressed: (){
+                                    Navigator.pushNamedAndRemoveUntil(context, RegistrationScreen.id_screen, (route) => false);
+                                  },
+                                  child:Text('Sign Up',
+                                    style: GoogleFonts.montserrat(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FontStyle.italic,
+                                        decoration: TextDecoration.underline,
+                                        color: grad1),
+                                  ),
 
-
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-
-
-
-
-
-
 
               ],
             ),
           ),
         ),
       ),
-    ),
+      resizeToAvoidBottomInset: false,
     );
 
   }
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   LoginAndAuthenticateUser(BuildContext context) async{
@@ -159,13 +247,18 @@ class LoginScreen extends StatelessWidget {
         email: emailTextEditingController.text,
         password: passwordTextEditingController.text).catchError((errMsg){
           Navigator.pop(context);
-      displayToastMsg("ERROR!! "+errMsg.toString(), context);
+          showDialog(context: context,
+              barrierDismissible: false
+              ,builder:(BuildContext context)
+              {
+                return ErrorDialogue(message: errMsg.toString());
+              });
     }) ).user;
 
     if(firebaseUser != null)
     {
       //save user info to db
-      
+
       userRef.child(firebaseUser.uid).once().then((DataSnapshot snap){
       if(snap.value!= null)
         {

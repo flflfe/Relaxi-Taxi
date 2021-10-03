@@ -126,12 +126,10 @@ class Methods
         Map <dynamic,dynamic> keys= snap.value;
         List<String>keysList= [];
         keys.forEach((key, value) {keysList.add(key);});
-        print(keysList.toString());
         await Provider.of<AppData>(context,listen: false).clearTripHistoryList();
         for(String key in keysList)
         {
           await newReqRef.child(key).once().then((DataSnapshot snap) async{
-            //print(snap.value.toString());
             if(snap.value!=null)
             {
               History history= History.fromSnapshot(snap);

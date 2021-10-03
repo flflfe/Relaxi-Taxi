@@ -11,7 +11,7 @@ class Drivers{
   double? avg_rating;
   double? earnings;
   int? total_trips;
-
+  String? gender;
   Drivers({
     this.name,
     this.phone,
@@ -23,6 +23,7 @@ class Drivers{
     this.total_trips,
     this.earnings,
     this.avg_rating,
+    this.gender
 });
 
   Drivers.fromSnapshot(DataSnapshot dataSnapshot)
@@ -40,7 +41,7 @@ class Drivers{
     total_trips=dataSnapshot.value['total_trips']!=null?int.parse(dataSnapshot.value['total_trips'].toString()):0;
     earnings=dataSnapshot.value['earnings']!=null?double.parse(dataSnapshot.value['earnings'].toString()):0;
     avg_rating=dataSnapshot.value['avg_rating']!=null?double.parse(dataSnapshot.value['avg_rating'].toString()):0;
-
+    gender=dataSnapshot.value['gender']!=null?dataSnapshot.value['gender'].toString():null;
 
   }
 }

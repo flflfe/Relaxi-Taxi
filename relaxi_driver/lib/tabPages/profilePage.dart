@@ -2,16 +2,19 @@ import 'dart:io';
 
 import 'dart:math' as math;
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:relaxi_driver/AllScreens/loginScreen.dart';
 import 'package:relaxi_driver/AllWidgets/dialogueBox.dart';
 import 'package:relaxi_driver/AllWidgets/speedDialCustom.dart';
 import 'package:relaxi_driver/Assistants/methods.dart';
@@ -20,6 +23,7 @@ import 'package:relaxi_driver/DataHandler/appData.dart';
 import 'package:relaxi_driver/Models/drivers.dart';
 import 'package:relaxi_driver/constants/all_cons.dart';
 import 'package:relaxi_driver/main.dart';
+import 'package:timelines/timelines.dart';
 import 'ratingPage.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -90,42 +94,30 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
               color: Colors.white,
               image: new DecorationImage(
                 image: new ExactAssetImage('assets/profile_bg.png'),
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
               ),
             ),
             child: Stack(
-
               children: [
-
                 Positioned(
-                  bottom:60,
+                  top:(_height/2-60)/2,
                   left: ((_width/2) -116)/2,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            color: Colors.grey.shade400, blurRadius: 2.0
-                          )
-                        ],
-                        borderRadius: BorderRadius.circular(100.0)
-                      ),
-                      child: CircleAvatar(
-                      radius: 50.0,
-                      backgroundColor: Colors.grey,
-                      foregroundImage: imageUrl!=null?NetworkImage(imageUrl!) :
-                      AssetImage('assets/user.png') as ImageProvider
-                      ),
+                      height: 100,
+                      width: 100,
+                      color: Colors.transparent,
+                      child: Center(child: Image.asset(driver.gender==null?'assets/user.png':driver.gender=='Male'?'assets/m_driver.png':'assets/f_driver.png',fit: BoxFit.cover,))
                     ),
                   ),
                 ),
-                Positioned(bottom: 10.0,
+                Positioned(top: ((_height/2-60)/2)+116,
                   child: Container(
                     width: _width/2,
                     child: Center(
                       child: Text(
-                        driver.name!,overflow: TextOverflow.fade, style: GoogleFonts.lobster(color: grad1),textAlign: TextAlign.center,
+                        driver.name!,overflow: TextOverflow.fade, style: GoogleFonts.pacifico(color: grad1),textAlign: TextAlign.center,
                       textScaleFactor: 1.7,
                 ),
                     ),
@@ -141,13 +133,13 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                       Icons.logout,
                     ],
                     secondaryIconsText: [
-
                       "log out",
-
                     ],
                     secondaryIconsOnPress: [
-                          () => {},
+                          (){FirebaseAuth.instance.signOut();
+                          Navigator.pushNamedAndRemoveUntil(context, LoginScreen.id_screen, (route) => false);
 
+                          },
                     ],
                     secondaryBackgroundColor: Colors.grey[900],
                     secondaryForegroundColor: grad1,
@@ -156,32 +148,45 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                   ),
 
                 )),
-
-
               ],
 
             ),
 
           ),
+          SizedBox(height: 10,),
           Expanded(
             child: Container(
+              padding: EdgeInsets.only(top: 10.0,bottom: 10.0),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.grey,
+                      blurRadius: 5.0
+                    )
+                  ],
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(50.0),
+                      topRight: Radius.circular(50.0)
+                  )
+              ),
               child: SingleChildScrollView(
                // physics: NeverScrollableScrollPhysics(),
 
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 40.0),
+                  padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 40.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text('Personal Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.1,),
+                      Text('Personal Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.3,),
                       Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: _width/3,indent: _width/3,),
                       SizedBox(height: 5.0,),
                       Container(
-                        padding: EdgeInsets.only(left: 10.0, ),
+                        padding: EdgeInsets.only(left: 10.0, top: 10.0,bottom: 10.0),
                         decoration: BoxDecoration(
+                            color: grad1.withOpacity(0.1),
                             border:Border(
-                                left: BorderSide(color: grey.withOpacity(0.4), width: 2.0,)
+                                left: BorderSide(color: grad1.withOpacity(0.8), width:3.0,)
                             )
                         ),
                         child: Column(
@@ -209,16 +214,17 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                         ),
                       ),
                       SizedBox(height: 20.0,),
-                      Text('Car Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.1,),
+                      Text('Car Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.3,),
                       Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: _width/3,indent: _width/3,),
                       SizedBox(height: 5.0,),
                       Container(
-                          padding: EdgeInsets.only(left: 10.0, ),
-                          decoration: BoxDecoration(
-                              border:Border(
-                                  left: BorderSide(color: grey.withOpacity(0.4), width: 2.0,)
-                              )
-                          ),
+                        padding: EdgeInsets.only(left: 10.0, top: 10.0,bottom: 10.0),
+                        decoration: BoxDecoration(
+                            color: grad1.withOpacity(0.1),
+                            border:Border(
+                                left: BorderSide(color: grad1.withOpacity(0.8), width:3.0,)
+                            )
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,14 +258,15 @@ class _ProfilePageState extends State<ProfilePage> with TickerProviderStateMixin
                         ),
                       ),
                       SizedBox(height: 20.0,),
-                      Text('Trips Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.1,),
+                      Text('Trips Info.', style: GoogleFonts.montserrat(fontWeight: FontWeight.w500),textScaleFactor: 1.3,),
                       Divider(height: 15.0,thickness: 4.0,color: grad1,endIndent: _width/3,indent: _width/3,),
                       SizedBox(height: 5.0,),
                       Container(
-                        padding: EdgeInsets.only(left: 10.0, ),
+                        padding: EdgeInsets.only(left: 10.0, top: 10.0,bottom: 10.0),
                         decoration: BoxDecoration(
+                            color: grad1.withOpacity(0.1),
                             border:Border(
-                                left: BorderSide(color: grey.withOpacity(0.4), width: 2.0,)
+                                left: BorderSide(color: grad1.withOpacity(0.8), width:3.0,)
                             )
                         ),
                         child: Column(

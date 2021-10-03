@@ -13,5 +13,7 @@ final assetsAudioPlayer = AssetsAudioPlayer();
 User? firebaseUser;
 Users userCurrentInfo= new Users("", "", "", "");
 User? currentFirebaseUser;
+bool? hasCompletedProf;
 Position? currentPosition;
 Drivers? driversInfo;
+bool?isFirstTimeBool;

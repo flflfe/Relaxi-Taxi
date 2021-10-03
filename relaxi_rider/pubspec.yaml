@@ -48,6 +48,13 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  dropdown_search: ^1.0.0
+  intro_slider: ^3.0.2
+  flutter_otp: ^0.3.2
+  pin_code_fields: ^7.3.0
+  carousel_slider: ^4.0.0
+  otp_timer_button: ^1.1.0
+  shared_preferences: ^2.0.7
 
 dev_dependencies:
   flutter_test:
@@ -101,6 +108,27 @@ flutter:
     - assets/fav.png
     - assets/driver_car.png
     - assets/toktok.png
+    - assets/2.png
+    - assets/3.png
+    - assets/logo_intro.png
+    - assets/no_time.png
+    - assets/our_goal.png
+    - assets/female_rider.png
+    - assets/male_rider.png
+    - assets/error_auth.png
+    - assets/egypt.png
+    - assets/not_found.png
+    - assets/otp_success.png
+    - assets/otp.png
+    - assets/add_phone.png
+    - assets/male.png
+    - assets/driver_prof.png
+    - assets/late.png
+    - assets/enjoy_ride.png
+    - assets/realtime_tracking.png
+    - assets/choose_destination.png
+    - assets/taxi_details.png
+
 
 
 

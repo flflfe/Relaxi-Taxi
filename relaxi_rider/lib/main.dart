@@ -11,14 +11,59 @@ import 'package:flutter_app/AllScreens/profilePage.dart';
 import 'package:flutter_app/AllScreens/splashScreen.dart';
 import 'package:flutter_app/AllScreens/tripHistoryPage.dart';
 import 'package:flutter_app/AllWidgets/dialogueBox.dart';
+import 'package:flutter_app/Configurations/configMaps.dart';
 import 'package:flutter_app/DataHandler/appData.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'constants/all_cons.dart';
+
+Future<bool?> hasCompletedProfile() async
+{
+  firebaseUser= FirebaseAuth.instance.currentUser;
+  if(firebaseUser!=null)
+  {
+    bool is_completed=await FirebaseDatabase.instance.reference().child("users").child(firebaseUser!.uid).once().then((snap) {
+      if(snap.value!=null)
+      {
+        if(snap.value["phone"]==null)
+        {
+          return false;
+        }
+        else
+        {
+          print('doneee');
+
+          return true;
+        }
+      }
+      else{
+        return false;
+      }
+    });
+    return is_completed;
+  }
+  return false;
+}
+Future<bool> isFirstTime() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var isFirstTime = prefs.getBool('first_time');
+  if (isFirstTime != null && !isFirstTime) {
+    prefs.setBool('first_time', false);
+    return false;
+  } else {
+    return true;
+  }
+}
 void main() async{
   runZonedGuarded(() async{
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
-
+    firebaseUser= await FirebaseAuth.instance.currentUser;
+    hasCompletedProf=await hasCompletedProfile();
+    isFirstTimeBool=await isFirstTime();
+    print(hasCompletedProf);
     runApp(MyApp());
   }, (Object error, StackTrace stack) {
 
@@ -30,8 +75,13 @@ DatabaseReference userRef= FirebaseDatabase.instance.reference().child("users");
 DatabaseReference driversRef= FirebaseDatabase.instance.reference().child("drivers");
 DatabaseReference rideRef= FirebaseDatabase.instance.reference().child("Ride Requests");
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
 
@@ -42,6 +92,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
 
           primarySwatch: Colors.blue,
+          splashColor: grad1,
         ),
 
         initialRoute: SplashScreen.id_screen,

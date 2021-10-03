@@ -2,157 +2,438 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:relaxi_driver/AllScreens/carInfoScreen.dart';
 import 'package:relaxi_driver/AllScreens/loginScreen.dart';
 import 'package:relaxi_driver/AllScreens/mainscreen.dart';
+import 'package:relaxi_driver/AllScreens/phoneVerification.dart';
 import 'package:relaxi_driver/AllWidgets/buttons.dart';
 import 'package:relaxi_driver/AllWidgets/dialogueBox.dart';
+import 'package:relaxi_driver/AllWidgets/errorDialogue.dart';
 import 'package:relaxi_driver/Configurations/configMaps.dart';
 import 'package:relaxi_driver/constants/all_cons.dart';
 import 'package:relaxi_driver/main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_core/firebase_core.dart';
-class RegistrationScreen extends StatelessWidget {
+class RegistrationScreen extends StatefulWidget {
 
+
+  RegistrationScreen({Key? key}) : super(key: key);
+  static const String id_screen="register";
+
+  @override
+  _RegistrationScreenState createState() => _RegistrationScreenState();
+}
+
+class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController nameTextEditingController = TextEditingController();
+
   TextEditingController emailTextEditingController = TextEditingController();
 
   TextEditingController phoneTextEditingController = TextEditingController();
 
   TextEditingController passwordTextEditingController = TextEditingController();
+
+  TextEditingController passwordTextEditingControllerConfirm = TextEditingController();
+
+
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  RegistrationScreen({Key? key}) : super(key: key);
-  static const String id_screen="register";
+  bool startedUserName=false;
 
+  bool startedEmail=false;
 
+  bool startedPassword=false;
+
+  bool startedPhone=false;
+
+  bool startedPasswordConfirm=false;
+
+  bool showPass=false;
+
+  bool showPassConfirm=false;
+
+  bool passConfirmValidate=true;
+  bool passValidate=true;
+  bool emailValidate=true;
+  bool userNameValidate=true;
+  bool genderValidate=true;
+
+  String _gender='gender';
+
+  String _userNameError='';
+  String _emailError='';
+  String _passError='';
+  String _confirmPassError='';
   @override
   Widget build(BuildContext context) {
     final double _height= MediaQuery.of(context).size.height;
     final double _width= MediaQuery.of(context).size.width;
     void ValidateInput(){
+       setState(() {
+         passConfirmValidate=true;
+         passValidate=true;
+         emailValidate=true;
+         userNameValidate=true;
+         genderValidate=true;
+       });
+       bool hasError=false;
       if(nameTextEditingController.text.trim().length<4)
       {
-        displayToastMsg("User name must be at least 3 characters",context);
+        setState(() {
+          userNameValidate=false;
+          _userNameError="User name must be at least 3 characters";
+        });
+        hasError=true;
       }
-      else if(!emailTextEditingController.text.contains('@'))
+      if(!emailTextEditingController.text.contains('@'))
       {
-        displayToastMsg( "Email address is not valid", context);
+        setState(() {
+          emailValidate=false;
+          _emailError="Email address is not valid";
+        });
+        hasError=true;
 
       }
-      else if(passwordTextEditingController.text.trim().length<9)
+      if(passwordTextEditingController.text.trim().length<9)
       {
-        displayToastMsg( "Password must be at least 8 characters", context);
+        setState(() {
+          passValidate=false;
+          _passError="Password must be at least 8 characters";
+        });
+        hasError=true;
 
       }
-      else if(phoneTextEditingController.text.trim().length!=11)
+      else if(passwordTextEditingController.text!=passwordTextEditingControllerConfirm.text)
       {
-        displayToastMsg( "Invalid Phone number", context);
+        setState(() {
+          passConfirmValidate=false;
+          _confirmPassError="Passwords don't match";
+        });
+        hasError=true;
 
       }
-      else
+      if(_gender=='gender')
+        {
+          displayToastMsg( "please choose a gender!", context);
+          hasError=true;
+        }
+      if(hasError==false)
       {
         RegisterNewUser(context);
       }
     }
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50.0,vertical: 20.0),
-            child: Center(
-              child: Column(
-                mainAxisSize:MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-
-                  Image.asset('assets/logo_image.png',width: 0.25*_width,),
-                  SizedBox(height: 0.15*_height,),
-                  Column(
-                    mainAxisSize:MainAxisSize.min,
-
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 50.0,vertical: 20.0),
+          child: Center(
+            child: Column(
+              mainAxisSize:MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Text(
-                        "Register as a Driver",
-                        style: GoogleFonts.montserrat(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w500,
-                            color: grey),
-                      ),
-                      SizedBox(height: 25.0),
-                      TextField(
-                        textCapitalization: TextCapitalization.sentences,
-                        keyboardType: TextInputType.name,
-                        controller: nameTextEditingController,
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.person, color: yellow,),
-                          labelText: "User Name",
-                          labelStyle: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            textStyle: TextStyle(color: grey ),
-
-                          ),
-                          hintStyle: GoogleFonts.montserrat(
-                            fontSize: 10.0,
-                            textStyle: TextStyle(color: grey ),),
+                      Image.asset('assets/logo_image.png',width: 0.35*_width,),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Hi, new driver!",
+                              style: GoogleFonts.pacifico(
+                                  fontWeight: FontWeight.w500,
+                                  color:grad1),
+                              textScaleFactor: 2.0,
+                            ),
+                            Text(
+                              " create a new account",
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey.shade500,),
+                              textAlign: TextAlign.start,
+                              textScaleFactor: 1.0,
+                            )
+                          ],
                         ),
                       ),
-                      SizedBox(height: 25.0),
-                      TextField(
-                        keyboardType: TextInputType.emailAddress,
-                        controller: emailTextEditingController,
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.email_outlined, color: yellow,),
-                          labelText: "Email Address",
-                          labelStyle: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            textStyle: TextStyle(color: grey ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    child: Center(
+                      child: Scrollbar(
+                        interactive: true,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(height: 25.0,),
+                              //userName
+                              TextField(
+                                textCapitalization: TextCapitalization.sentences,
+                                keyboardType: TextInputType.name,
+                                controller: nameTextEditingController,
+                                onTap: (){
+                                  setState(() {
+                                    startedUserName=true;
+                                    startedEmail=false;
+                                    startedPassword=false;
+                                    startedPhone=false;
+                                    startedPasswordConfirm=false;
+                                  });
+                                },
+                                onSubmitted: (val){
+                                  setState(() {
+                                    startedUserName=false;
+                                  });
+                                },
+                                cursorHeight: 25,
+                                cursorColor: grad1,
+                                style: GoogleFonts.montserrat(fontSize: 16.0),
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  errorText: userNameValidate?null:_userNameError,
+                                  icon: Icon(CupertinoIcons.person_solid, color: yellow,),
+                                  labelText: "User Name",
+                                  labelStyle: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(color: grey.withOpacity(0.5) ),
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.grey.shade300,width: 1.5)
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: grad1,width: 2.0)
+                                  ),
+                                  filled: true,
+                                  fillColor: startedUserName?
+                                  (userNameValidate?Colors.yellow.withOpacity(0.1):Colors.red.withOpacity(0.1)):
+                                  (userNameValidate?Colors.transparent:Colors.red.withOpacity(0.1)),
+                                  suffixIcon: startedUserName?
+                                  GestureDetector(
+                                      onTap: (){
+                                        nameTextEditingController.clear();
+                                      },
+                                      child: Icon(CupertinoIcons.xmark,color: grad1,size: 20.0,)
+                                  ):null,
+                                ),
+                              ),
+                              SizedBox(height: 25.0),
+                              //email
+                              TextField(
+                                keyboardType: TextInputType.emailAddress,
+                                controller: emailTextEditingController,
+                                onTap: (){
+                                  setState(() {
+                                    startedUserName=false;
+                                    startedEmail=true;
+                                    startedPassword=false;
+                                    startedPhone=false;
+                                    startedPasswordConfirm=false;
+                                  });
+                                },
+                                onSubmitted: (val){
+                                  setState(() {
+                                    startedEmail=false;
+                                  });
+                                },
+                                cursorHeight: 25,
+                                cursorColor: grad1,
+                                style: GoogleFonts.montserrat(fontSize: 16.0),
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  errorText: emailValidate?null:_emailError,
+                                  icon: Icon(Icons.email, color: yellow,),
+                                  labelText: "Email Address",
+                                  labelStyle: GoogleFonts.montserrat(
+                                    textStyle: TextStyle(color: grey.withOpacity(0.5) ),
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.grey.shade300,width: 1.5)
+                                  ),
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(color: grad1,width: 2.0)
+                                  ),
+                                  filled: true,
+                                  fillColor: startedEmail?
+                                  (emailValidate?Colors.yellow.withOpacity(0.1):Colors.red.withOpacity(0.1)):
+                                  (emailValidate?Colors.transparent:Colors.red.withOpacity(0.1)),
+                                  suffixIcon: startedEmail?
+                                  GestureDetector(
+                                      onTap: (){
+                                        emailTextEditingController.clear();
+                                      },
+                                      child: Icon(CupertinoIcons.xmark,color: grad1,size: 20.0,)
+                                  ):null,
+                                ),
+                              ),
+                              SizedBox(height: 25.0),
+                              //password
+                              TextField(
+                                controller: passwordTextEditingController,
+                                obscureText: !showPass,
+                                onTap: (){
+                                  setState(() {
+                                    startedUserName=false;
+                                    startedEmail=false;
+                                    startedPassword=true;
+                                    startedPhone=false;
+                                    startedPasswordConfirm=false;
+                                  });
+                                },
+                                onSubmitted: (val){
+                                  setState(() {
+                                    startedPassword=false;
+                                    showPass=false;
+                                  });
+                                },
+                                cursorHeight: 25,
+                                cursorColor: grad1,
+                                style: GoogleFonts.montserrat(fontSize: 16.0),
+                                decoration: InputDecoration(
+                                    isDense: true,
+                                    errorText: passValidate?null:_passError,
+                                    icon: Icon(CupertinoIcons.lock_fill, color: yellow,),
+                                    labelText: "Password",
+                                    labelStyle: GoogleFonts.montserrat(
+                                      textStyle: TextStyle(color: grey.withOpacity(0.5) ),
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.grey.shade300,width: 1.5)
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(color: grad1,width: 2.0)
+                                    ),
+                                    filled: true,
+                                    fillColor: startedPassword?
+                                    (passValidate?Colors.yellow.withOpacity(0.1):Colors.red.withOpacity(0.1)):
+                                    (passValidate?Colors.transparent:Colors.red.withOpacity(0.1)),
+                                    suffixIcon: startedPassword?
+                                    GestureDetector(
+                                        onTap: (){
+                                          setState(() {
+                                            showPass=!showPass;
+                                          });
+                                        },
+                                        child: Icon(showPass?CupertinoIcons.eye_slash:CupertinoIcons.eye,color: grad1,size: 20.0,)
+                                    ):null
+                                ),
+                              ),
+                              SizedBox(height: 25.0),
+                              //password Confirm
+                              TextField(
+                                controller: passwordTextEditingControllerConfirm,
+                                obscureText: !showPassConfirm,
+                                onTap: (){
+                                  setState(() {
+                                    startedUserName=false;
+                                    startedEmail=false;
+                                    startedPassword=false;
+                                    startedPhone=false;
+                                    startedPasswordConfirm=true;
+                                  });
+                                },
+                                onSubmitted: (val){
+                                  setState(() {
+                                    startedPasswordConfirm=false;
+                                    showPassConfirm=false;
+                                  });
+                                },
+                                cursorHeight: 25,
+                                cursorColor: grad1,
+                                style: GoogleFonts.montserrat(fontSize: 16.0),
+                                decoration: InputDecoration(
+                                    errorText: passConfirmValidate?null:_confirmPassError,
+                                    isDense: true,
+                                    icon: Icon(CupertinoIcons.lock_fill, color: yellow,),
+                                    labelText: "Password Confirm",
+                                    labelStyle: GoogleFonts.montserrat(
+                                      textStyle: TextStyle(color: grey.withOpacity(0.5) ),
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.grey.shade300,width: 1.5)
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(color: grad1,width: 2.0)
+                                    ),
+                                    filled: true,
+                                    fillColor: startedPasswordConfirm?
+                                    (passConfirmValidate?Colors.yellow.withOpacity(0.1):Colors.red.withOpacity(0.1)):
+                                    (passConfirmValidate?Colors.transparent:Colors.red.withOpacity(0.1)),
+                                    suffixIcon: startedPasswordConfirm?
+                                    GestureDetector(
+                                        onTap: (){
+                                          setState(() {
+                                            showPassConfirm=!showPassConfirm;
+                                          });
+                                        },
+                                        child: Icon(showPassConfirm?CupertinoIcons.eye_slash:CupertinoIcons.eye,color: grad1,size: 20.0,)
+                                    ):null
+                                ),
+                              ),
+                              SizedBox(height: 25.0),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('Gender: ', style: GoogleFonts.montserrat(fontWeight: FontWeight.bold,color: grad1),),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Radio(
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        activeColor: grad1,
+                                        value: 'Male',
+                                        groupValue: _gender,
+                                        onChanged: (value){
+                                          setState(() {
+                                            print(value);
+                                            _gender=value as String;
+                                          });
+                                        },
+                                      ),
+                                      Text('♂️ Male',style: GoogleFonts.montserrat(color: Colors.black))
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Radio(
+                                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        activeColor: grad1,
+                                        value: 'Female',
+                                        groupValue: _gender,
+                                        onChanged: (value){
+                                          setState(() {
+                                            print(value);
+                                            _gender=value as String;
+                                          });
+                                        },
+                                      ),
+                                      Text('♀️Female️',style: GoogleFonts.montserrat(color: Colors.black),)
+                                    ],
+                                  )
+                                ],
+                              ),
+                              SizedBox(height: 100.0),
+                            ],
                           ),
-                          hintStyle: GoogleFonts.montserrat(
-                            fontSize: 10.0,
-                            textStyle: TextStyle(color: grey ),),
                         ),
                       ),
-
-                      SizedBox(height: 25.0),
-                      TextField(
-                        keyboardType: TextInputType.phone,
-                        controller: phoneTextEditingController,
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.phone_enabled_outlined, color: yellow,),
-                          labelText: "Phone Number",
-                          labelStyle: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            textStyle: TextStyle(color: grey ),
-
-                          ),
-                          hintStyle: GoogleFonts.montserrat(
-                            fontSize: 10.0,
-                            textStyle: TextStyle(color: grey ),),
-                        ),
-                      ),
-                      SizedBox(height: 25.0),
-                      TextField(
-                        controller: passwordTextEditingController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.vpn_key_outlined, color: yellow,),
-                          labelText: "Password",
-                          labelStyle: GoogleFonts.montserrat(
-                            fontSize: 14,
-                            textStyle: TextStyle(color: grey ),
-
-                          ),
-                          hintStyle: GoogleFonts.montserrat(
-                            fontSize: 10.0,
-                            textStyle: TextStyle(color: grey ),),
-                        ),
-                      ),
-                      SizedBox(height: (55/xd_height)*_height,),
-
-                      SubmitButton(onPressed: ValidateInput,txt: "Sign Up",),
-
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SubmitButton(onPressed: ValidateInput,txt: "Register",),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -182,16 +463,16 @@ class RegistrationScreen extends StatelessWidget {
                       )
                     ],
                   ),
-                ],
-              ),
+                )
+              ],
             ),
           ),
         ),
       ),
+      resizeToAvoidBottomInset:false,
+
     );
-
   }
-
 
 void RegisterNewUser (BuildContext context)async
 {
@@ -202,32 +483,60 @@ void RegisterNewUser (BuildContext context)async
   });
   final User? firebaseUser = (await _firebaseAuth.createUserWithEmailAndPassword(
       email: emailTextEditingController.text,
-      password: passwordTextEditingController.text).catchError((errMsg){
+      password: passwordTextEditingController.text).catchError((errMsg)async{
         Navigator.pop(context);
-        displayToastMsg("ERROR!! "+errMsg.toString(), context);
+        await showDialog(context: context,
+            barrierDismissible: false,
+            builder:(BuildContext context){
+              return ErrorDialogue(message: errMsg.toString(),);
+            });
+       // displayToastMsg("ERROR!! "+errMsg.toString(), context);
   }) ).user;
-if(firebaseUser != null)
+  storeUseInDb(firebaseUser!);
+}
+  void storeUseInDb(User firebaseUser)
   {
-    //save user info to db
-    Map userDataMap= {
-      "name": nameTextEditingController.text.trim(),
-      "email":emailTextEditingController.text.trim(),
-      "phone":phoneTextEditingController.text.trim()
-    };
-    driversRef.child(firebaseUser.uid).set(userDataMap);
-    currentFirebaseUser = firebaseUser;
-    displayToastMsg("Successfully Created a New User !",context);
-    Navigator.pushNamedAndRemoveUntil(context, CarInfoScreen.idScreen, (route) => false);
+    if(firebaseUser != null)
+    {
+      //save user info to db
+      Map userDataMap= {
+        "name": nameTextEditingController.text.trim(),
+        "email":emailTextEditingController.text.trim(),
+        "gender":_gender
+      };
+      driversRef.child(firebaseUser.uid).set(userDataMap);
+      currentFirebaseUser = firebaseUser;
+      displayToastMsg("Successfully Created a New User !",context);
+      Navigator.pushNamedAndRemoveUntil(context, PhoneVerification.id_screen, (route) => false);
 
-  }
-else{
-  //error message
-  Navigator.pop(context);
-  displayToastMsg("Failed to Create New User",context);
+    }
+    else{
+      //error message
+      Navigator.pop(context);
+      displayToastMsg("Failed to Create New User",context);
     }
   }
 }
+
 displayToastMsg(String Message, BuildContext context){
 
   Fluttertoast.showToast(msg: Message);
 }
+
+
+/*TextField(
+keyboardType: TextInputType.phone,
+controller: phoneTextEditingController,
+decoration: InputDecoration(
+icon: Icon(Icons.phone_enabled_outlined, color: yellow,),
+labelText: "Phone Number",
+labelStyle: GoogleFonts.montserrat(
+fontSize: 14,
+textStyle: TextStyle(color: grey ),
+
+),
+hintStyle: GoogleFonts.montserrat(
+fontSize: 10.0,
+textStyle: TextStyle(color: grey ),),
+),
+),*/

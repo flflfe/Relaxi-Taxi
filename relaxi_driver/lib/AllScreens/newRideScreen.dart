@@ -413,7 +413,7 @@ class _NewRideScreenState extends State<NewRideScreen>  with TickerProviderState
                     top:20,
                     child:CircleAvatar(
                      // backgroundColor: Colors.black,
-                      backgroundImage: AssetImage('assets/user.png'),
+                      backgroundImage: AssetImage(widget.rideDetails!.rider_gender! == 'Female'? 'assets/female_rider.png':'assets/male_rider.png'),
                       radius: 40.0,
                     ),
                   ),

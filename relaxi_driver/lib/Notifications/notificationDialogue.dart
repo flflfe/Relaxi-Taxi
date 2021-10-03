@@ -34,7 +34,7 @@ class NotificationDialogue extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(height: 30.0,),
-              Image.asset('assets/female.png',width: 200,),
+              Image.asset(rideDetails!.rider_gender=='Female'?'assets/female.png':'assets/male.png',width: 200,),
               SizedBox(height: 20.0,),
               Text('New Ride Request!',
               style: GoogleFonts.jua(

@@ -8,6 +8,7 @@ class Users{
   int? total_trips;
   Address? home;
   Address? work;
+  String? gender;
   Users(
   {   this.id,
       this.email,
@@ -15,17 +16,18 @@ class Users{
       this.phone,
       this.total_trips,
       this.work,
-      this.home
+      this.home,
+    this.gender
   }
 
       );
   Users.fromSnapshot(DataSnapshot dataSnapshot)
   {
     id=dataSnapshot.key!.toString();
-    email= dataSnapshot.value['email'].toString();
-    name= dataSnapshot.value['name'].toString();
-    phone=dataSnapshot.value['phone'].toString();
-    total_trips = int.parse(dataSnapshot.value['total_trips'].toString());
+    email= dataSnapshot.value['email']!=null?dataSnapshot.value['email'].toString():"";
+    name= dataSnapshot.value['name']!=null?dataSnapshot.value['name'].toString():"";
+    phone=dataSnapshot.value['phone']!=null?dataSnapshot.value['phone'].toString():"";
+    total_trips = dataSnapshot.value['total_trips']!=null?int.parse(dataSnapshot.value['total_trips'].toString()):0;
     if(dataSnapshot.value['home']!=null) {
       home= new Address("", "", "", 0.0, 0.0);
       home?.placeName = dataSnapshot.value['home']['place_name'].toString();
@@ -42,5 +44,6 @@ class Users{
       work?.longitude = double.parse(dataSnapshot.value['work']['longitude'].toString());
       work?.latitude = double.parse(dataSnapshot.value['work']['latitude'].toString());
     }
+    gender=dataSnapshot.value['gender']??"";
   }
 }

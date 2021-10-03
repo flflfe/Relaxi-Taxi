@@ -55,6 +55,15 @@ dependencies:
   auto_size_text_pk: ^3.0.0
   sliding_up_panel: ^2.0.0+1
   timelines: ^0.1.0
+  dropdown_search: ^1.0.0
+  intro_slider: ^3.0.2
+  flutter_otp: ^0.3.2
+  pin_code_fields: ^7.3.0
+  carousel_slider: ^4.0.0
+  otp_timer_button: ^1.1.0
+  shared_preferences: ^2.0.7
+
+
 
 
 dev_dependencies:
@@ -109,6 +118,28 @@ flutter:
     - assets/very_good_driver.gif
     - assets/profile_bg.png
     - assets/driver_bg.png
+    - assets/error_auth.png
+    - assets/egypt.png
+    - assets/enter_code.png
+    - assets/not_found.png
+    - assets/otp_success.png
+    - assets/otp.png
+    - assets/add_phone.png
+    - assets/taxi_details.png
+    - assets/2.png
+    - assets/3.png
+    - assets/4.png
+    - assets/m_driver.png
+    - assets/f_driver.png
+    - assets/logo_intro.png
+    - assets/no_time.png
+    - assets/our_goal.png
+    - assets/female_rider.png
+    - assets/male_rider.png
+    - assets/late.png
+    - assets/enjoy_ride.png
+    - assets/realtime_tracking.png
+    - assets/choose_destination.png
 
 
   #   - images/a_dot_burr.jpeg

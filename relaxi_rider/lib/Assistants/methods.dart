@@ -86,9 +86,8 @@ class Methods {
     String userId = firebaseUser!.uid;
     DatabaseReference reference = FirebaseDatabase.instance.reference().child(
         "users").child(userId);
-    await reference.once().then((DataSnapshot dataSnapshot) {
-      userCurrentInfo = Users.fromSnapshot(dataSnapshot);
-
+    userCurrentInfo=await reference.once().then((DataSnapshot dataSnapshot) {
+      return Users.fromSnapshot(dataSnapshot);
     });
   }
 

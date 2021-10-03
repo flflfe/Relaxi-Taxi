@@ -102,7 +102,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         child: ClipRRect(
               borderRadius: BorderRadius.all(
               Radius.circular(35.0)
-
               ),
           child:BottomNavigationBar(
 

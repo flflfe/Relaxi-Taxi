@@ -10,6 +10,8 @@ class RideDetails
   String? payment_method;
   String? rider_name;
   String? rider_phone;
+  String? rider_gender;
+  String? driver_gender;
   RideDetails({
     this.pickup_address,
     this.dropoff_address,
@@ -18,7 +20,9 @@ class RideDetails
     this.ride_request_id,
     this.payment_method,
     this.rider_name,
-    this.rider_phone
+    this.rider_phone,
+    this.rider_gender,
+    this.driver_gender
 });
 
 

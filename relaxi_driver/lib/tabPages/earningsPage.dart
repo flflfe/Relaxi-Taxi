@@ -18,7 +18,7 @@ class EarningsPage extends StatefulWidget {
   _EarningsPageState createState() => _EarningsPageState();
 }
 
-class _EarningsPageState extends State<EarningsPage> {
+class _EarningsPageState extends State<EarningsPage> with SingleTickerProviderStateMixin{
   @override
   void initState() {
     // TODO: implement initState
@@ -27,9 +27,11 @@ class _EarningsPageState extends State<EarningsPage> {
 
   }
 
+  final ScrollController _firstController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
+
     List<History> trips=Provider.of<AppData>(context).tripCards;
     final double _height= MediaQuery.of(context).size.height;
     final double _width= MediaQuery.of(context).size.width;
@@ -41,23 +43,32 @@ class _EarningsPageState extends State<EarningsPage> {
           alignment: Alignment.topCenter,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 10.0),
-              child: ListView.builder(
+              padding: const EdgeInsets.only(top: 80.0,bottom: 0.0,right: 10.0, left: 10.0),
+              child: Scrollbar(
+                thickness: 10.0,
+                radius: Radius.circular(5),
+                interactive: true,
+                //isAlwaysShown: true,
+                showTrackOnHover: true,
+                child:ListView.builder(
+                  shrinkWrap: true,
                   itemBuilder: (context,index){
                     if(index==0)
                     {
-                      return Column(
-                        children: [
-                          SizedBox(height: 90.0,),
-                          TripCard(height: _height,trip: trips[index],)
-                        ],
+                      return Container(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 20.0,),
+                            TripCard(height: _height,trip: trips[index],)
+                          ],
+                        ),
                       );
                     }
                     return TripCard(height: _height,trip: trips[index],);
                   },
                   //separatorBuilder: separatorBuilder,
                   itemCount: trips.length),
-            ),
+            ),),
             Positioned(
               child: Container(
                 width: _width,

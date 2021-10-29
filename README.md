@@ -5,19 +5,23 @@
  🏁 Relaxi Taxi 🏁
   </h1>
   
-  <img src="repo_assets/tumblr_oec86e61zf1rskx02o3_r1_250.gif" align="left" width="200" hspace="10" vspace="10">
+  <img src="repo_assets/tumblr_oec86e61zf1rskx02o3_r1_250.gif" align="left" width="270" hspace="10" vspace="10">
   
-  [![Star on GitHub](https://img.shields.io/github/stars/all-contributors/all-contributors.svg?style=social)](https://github.com/DoniaEsawi/Relaxi-Taxi/)
+  [![Star on GitHub](https://img.shields.io/github/stars/DoniaEsawi/Relaxi-Taxi.svg?style=social)]("https://github.com/DoniaEsawi/Relaxi-Taxi/stargazers")
+    [![Fork on GitHub](https://img.shields.io/github/forks/DoniaEsawi/Relaxi-Taxi.svg?style=social)]("https://github.com/DoniaEsawi/Relaxi-Taxi/network/members")
+ [![Watch on GitHub](https://img.shields.io/github/watchers/DoniaEsawi/Relaxi-Taxi?style=social)]("")
+[![Languages on GitHub](https://img.shields.io/github/languages/count/DoniaEsawi/Relaxi-Taxi?style=social)]("")
 
 Relaxi is an online taxi booking app, developed by flutter & dart language. It's an easy, fast and safe way to order a taxi "Rider App" or to sign up as a driver and transport people to their destination "Driver App".
 <br/>
-
- 
   <h3 align="center" >
-  Not just a Taxi... It's Relaxi ^_-
+  Not just a Taxi... It's Relaxi ^_-</br></br>
+  <a href="https://drive.google.com/drive/folders/1crabTmExTDZQ3Ds3TWpzcC83AYPBGmat?usp=sharing">
+ <img src="repo_assets/android-button.png" height="60"
+         alt="Get it on Android">
+ </a>
    </h3> 
  </br>
-</br>
  
  ## Supported Platforms 📱
  
@@ -30,8 +34,7 @@ Relaxi is an online taxi booking app, developed by flutter & dart language. It's
     <tr>
 <td> Android </td>
      <td align="center"> 
-     <img src="repo_assets/android-button.png" height="70"
-         alt="Get it on Android">
+     Tested And Works Fine
      </td> 
    </tr>
     <tr>
@@ -47,3 +50,11 @@ Relaxi is an online taxi booking app, developed by flutter & dart language. It's
 <div align="center">
   <img src="repo_assets/app_promo.png" alt="promo" />
  </div>
+
+## Support 💛
+
+<a href="https://www.buymeacoffee.com/DoniaEsawi" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 200px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
+## Reviews & Suggestions 💌
+Send me your opinion or suggestion anonymosly on:</br></br>
+<a href="https://ask.fm/donyaafatah" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/ASKfm-logo.svg/1200px-ASKfm-logo.svg.png" style="height: 50px !important; " alt="Ask me" ></a>

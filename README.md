@@ -10,8 +10,7 @@
  
  ## Supported Platforms 📱
  
- <tr>
- <td>
+ 
   <table >
   <tr>
 <td> OS </td>
@@ -26,14 +25,12 @@
    <td> Not yet compatible </td> 
    </tr>
   </table >
- </td>
- <td>
+
 <a href=""> 
     <img src="repo_assets/android-button.png"
          alt="Get it on Android" height="100">
 </a>
-  </td>
-  </tr>
+ 
 </br></br>
 
 <div align="center">

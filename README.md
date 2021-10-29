@@ -7,8 +7,11 @@
   <h3 align="center">
    Not just a Taxi... It's Relaxi ^_- 
  </h3>  
+ 
+ ## Supported Platforms
+ 
  <p>
-## Supported Platforms
+
 
 | OS | Status |
 | -- | -- |

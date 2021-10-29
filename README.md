@@ -7,6 +7,11 @@
   <h3 align="center">
    Not just a Taxi... It's Relaxi ^_- 
  </h3>  
+##Supported Platforms
+| OS | Status |
+| -- | -- |
+| Android | Tested and working on Android |
+| iOS | Not yet compatible |
 
 <br/>
 <div align="center" >

@@ -1,8 +1,13 @@
+ <p align="center">
+  <img src="repo_assets/1.png" alt="logo" height="150" />
+</p>  
 <h1 align="center">
  🏁 Relaxi Taxi 🏁
-</h1>
-  <img src="repo_assets/1.png" alt="logo" height="200"  hspace="10" vspace="10"/>
+  </h1>
+  <h4 align="center">
    Not just a Taxi... It's Relaxi ^_- 
+ </h4>  
+
 <br/>
 <div style="display:flex;" >
 <a href="https://f-droid.org/app/org.horaapps.leafpic">

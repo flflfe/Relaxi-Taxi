@@ -10,7 +10,7 @@
  
  ## Supported Platforms 📱
  
- <div display="inline-block" align="center">
+ <div display="inline-block" >
   <table width="auto">
   <tr>
 <td> OS </td>

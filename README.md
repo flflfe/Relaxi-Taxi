@@ -8,9 +8,9 @@
    Not just a Taxi... It's Relaxi ^_- 
  </h3>  
  
- ## Supported Platforms
+ ## Supported Platforms 📱
  
- <p>
+ <p style="display:flex;">
 
 
 | OS | Status |

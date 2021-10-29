@@ -1,7 +1,7 @@
 <h1 align="center">
  🏁 Relaxi Taxi 🏁
 </h1>
-<p align="center">
+<p >
   <img src="repo_assets/1.png" alt="logo" height="150"/>
    Not just a Taxi... It's Relaxi ^_- 
 </p>

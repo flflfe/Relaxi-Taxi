@@ -10,20 +10,20 @@
  
  ## Supported Platforms 📱
  
- <p style="display:flex;">
-
-
+ <tr>
+ <td>
 | OS | Status |
 | -- | -- |
 | Android | Tested and working on Android |
 | iOS | Not yet compatible |
-
-
+ </td>
+ <td>
 <a href=""> 
     <img src="repo_assets/android-button.png"
          alt="Get it on Android" height="100">
 </a>
- </p>
+  </td>
+  </tr>
 </br></br>
 
 <div align="center">

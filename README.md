@@ -28,7 +28,7 @@
 
 <a href=""> 
     <img src="repo_assets/android-button.png"
-         alt="Get it on Android" height="100">
+         alt="Get it on Android">
 </a>
  </div>
 </br></br>

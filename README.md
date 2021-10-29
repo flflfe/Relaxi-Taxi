@@ -7,7 +7,6 @@
   <h3 align="center">
    Not just a Taxi... It's Relaxi ^_- 
  </h3>  
- <div style="display: flex;">
  <p>
 ## Supported Platforms
 
@@ -22,7 +21,6 @@
          alt="Get it on Android" height="100">
 </a>
  </p>
-</div>
 </br></br>
 
 <div align="center">

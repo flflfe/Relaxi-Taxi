@@ -12,10 +12,12 @@
  
  <tr>
  <td>
+  
 | OS | Status |
 | -- | -- |
 | Android | Tested and working on Android |
 | iOS | Not yet compatible |
+ 
  </td>
  <td>
 <a href=""> 

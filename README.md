@@ -10,7 +10,7 @@
  
  ## Supported Platforms 📱
  
- <div style="display:flex; " align="center">
+ <div display="flex" align="center">
   <table >
   <tr>
 <td> OS </td>

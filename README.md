@@ -11,7 +11,7 @@
  ## Supported Platforms 📱
  
  <div display="inline-block" >
-  <table width="auto">
+  <table width="auto" display="inline-block">
   <tr>
 <td> OS </td>
    <td> Status </td> 

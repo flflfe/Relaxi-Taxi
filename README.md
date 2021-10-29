@@ -10,7 +10,7 @@
  
  ## Supported Platforms 📱
  
- <div style="display:flex;">
+ <div style="display:flex; align:center;">
   <table >
   <tr>
 <td> OS </td>
@@ -27,7 +27,7 @@
   </table >
 
 <a href=""> 
-    <img src="repo_assets/android-button.png"
+    <img src="repo_assets/android-button.png" height="100"
          alt="Get it on Android">
 </a>
  </div>

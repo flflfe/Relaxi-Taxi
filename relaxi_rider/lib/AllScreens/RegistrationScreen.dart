@@ -121,6 +121,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       }
     }
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 50.0,vertical: 20.0),
@@ -497,6 +498,7 @@ if(firebaseUser != null)
     };
     userRef.child(firebaseUser.uid).set(userDataMap);
     displayToastMsg("Successfully Created a New User !",context);
+    print('ay hagaaaa');
     Navigator.pushNamedAndRemoveUntil(context, PhoneVerification.id_screen, (route) => false);
 
   }

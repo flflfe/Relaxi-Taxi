@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_app/Configurations/configMaps.dart';
 import 'package:flutter_app/DataHandler/appData.dart';
 import 'package:flutter_app/Models/AllUsers.dart';
@@ -79,15 +78,14 @@ class Methods {
     return double.parse(totalFare.toStringAsFixed(2));
   }
 
-  static Future<void> getCurrentOnlineUserInfo() async
+  static Future<void> getCurrentOnlineUserInfo(context) async
   {
-
     firebaseUser = await FirebaseAuth.instance.currentUser!;
     String userId = firebaseUser!.uid;
     DatabaseReference reference = FirebaseDatabase.instance.reference().child(
         "users").child(userId);
     userCurrentInfo=await reference.once().then((DataSnapshot dataSnapshot) {
-      return Users.fromSnapshot(dataSnapshot);
+      return Users.fromSnapshot(dataSnapshot,context);
     });
   }
 
@@ -133,21 +131,11 @@ class Methods {
   }
 
   ///for image picker
-  static UploadTask? uploadImage(String destination, File file){
-    try {
-      final ref= FirebaseStorage.instance.ref(destination);
-      print('Successfully uploaded image');
-      return ref.putFile(file);
-    } on FirebaseException catch (e) {
-      // TODO
-      print('couldn\'t upload image: $e');
-      return null;
-    }
-  }
+
   static Future<void> retrieveHistoryInfo (context) async
   {
     //retrieve trip history
-    await getCurrentOnlineUserInfo();
+    await getCurrentOnlineUserInfo(context);
     await userRef.child(userCurrentInfo.id!).child('history').once().then((DataSnapshot snap) async{
       if(snap.value == null)
         {

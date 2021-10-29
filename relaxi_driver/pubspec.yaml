@@ -23,14 +23,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^1.6.0
-  firebase_auth: ^3.1.0
+  firebase_core: ^1.7.0
+  firebase_auth: ^3.1.2
   firebase_database: ^7.2.1
   google_fonts: ^2.1.0
   fluttertoast: ^8.0.8
   clay_containers: ^0.3.2
   flutter_spinkit: ^5.1.0
-  google_maps_flutter: ^2.0.8
+  google_maps_flutter: ^2.0.9
   geolocator: ^7.6.0
   http: ^0.13.3
   provider: ^6.0.0
@@ -43,8 +43,6 @@ dependencies:
   firebase_messaging: ^10.0.7
   flutter_local_notifications: ^8.2.0
   assets_audio_player: ^3.0.3+6
-  image_picker: ^0.8.4+1
-  firebase_storage: ^10.0.3
   maps_toolkit: ^2.0.0
   flutter_speed_dial: ^4.4.0
   speed_dial_fab: ^2.1.1
@@ -62,6 +60,8 @@ dependencies:
   carousel_slider: ^4.0.0
   otp_timer_button: ^1.1.0
   shared_preferences: ^2.0.7
+  connectivity: ^3.0.6
+  overlay_support: ^1.2.1
 
 
 

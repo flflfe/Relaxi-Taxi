@@ -206,7 +206,9 @@ class _SearchScreenState extends State<SearchScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 0.0),
                           child: TextButton(
                             onPressed:(){
-                              Navigator.pop(context,"obtainDirection_home");
+                              if(homeAddress.placeName!="not set") {
+                                Navigator.pop(context, "obtainDirection_home");
+                              }
                             },
                             style: ButtonStyle(
                               overlayColor: MaterialStateProperty.all(grad1.withOpacity(0.5)),
@@ -236,7 +238,9 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: TextButton(
                             onPressed:()
                             {
-                              Navigator.pop(context,"obtainDirection_work");
+                              if(workAddress.placeName!="not set") {
+                                Navigator.pop(context, "obtainDirection_work");
+                              }
                             },
                             style: ButtonStyle(
                                 overlayColor: MaterialStateProperty.all(grad1.withOpacity(0.5)),
@@ -300,7 +304,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
 
 }
-void getPlaceAddressDetails(String id, context, {String place='dropOff'}) async
+Future<void> getPlaceAddressDetails(String id, context, {String place='dropOff'}) async
 {
   if(place=='dropOff') {
     showDialog(context: context,
@@ -327,7 +331,7 @@ void getPlaceAddressDetails(String id, context, {String place='dropOff'}) async
     address.placeFormattedAddress=response["result"]["formatted_address"];
     if(place=='dropOff') {Provider.of<AppData>(context, listen: false).updateDropOffLocation(address);}
     if(place=='home') {
-        Provider.of<AppData>(context, listen: false).updateHomeLocation(address);
+        await Provider.of<AppData>(context, listen: false).updateHomeLocation(address);
         Methods.updateHomeAddress(address);
         print("This Is Home Location :: ");
         print(address.placeName);
@@ -337,7 +341,7 @@ void getPlaceAddressDetails(String id, context, {String place='dropOff'}) async
         });
     }
     if(place=='work') {
-        Provider.of<AppData>(context, listen: false).updateWorkLocation(address);
+        await Provider.of<AppData>(context, listen: false).updateWorkLocation(address);
         Methods.updateWorkAddress(address);
         print("This Is Work Location :: ");
         print(address.placeName);

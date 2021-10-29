@@ -1,5 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_app/DataHandler/appData.dart';
 import 'package:flutter_app/Models/address.dart';
+import 'package:provider/provider.dart';
 class Users{
   String? name;
   String? id;
@@ -21,7 +23,7 @@ class Users{
   }
 
       );
-  Users.fromSnapshot(DataSnapshot dataSnapshot)
+  Users.fromSnapshot(DataSnapshot dataSnapshot, context)
   {
     id=dataSnapshot.key!.toString();
     email= dataSnapshot.value['email']!=null?dataSnapshot.value['email'].toString():"";
@@ -35,6 +37,12 @@ class Users{
       dataSnapshot.value['home']['place_formatted_address'].toString();
       home?.longitude = double.parse(dataSnapshot.value['home']['longitude'].toString());
       home?.latitude = double.parse(dataSnapshot.value['home']['latitude'].toString());
+      Provider.of<AppData>(context, listen: false).setHomeLocation(home!);
+
+    }
+    else{
+      Address notSet= new Address("not set", "not set", "not set",0.0,0.0);
+      Provider.of<AppData>(context, listen: false).setHomeLocation(notSet);
     }
     if(dataSnapshot.value['work']!=null) {
       work= new Address("", "", "", 0.0, 0.0);
@@ -43,7 +51,13 @@ class Users{
       dataSnapshot.value['work']['place_formatted_address'].toString();
       work?.longitude = double.parse(dataSnapshot.value['work']['longitude'].toString());
       work?.latitude = double.parse(dataSnapshot.value['work']['latitude'].toString());
+      Provider.of<AppData>(context, listen: false).setWorkLocation(work!);
     }
+    else
+      {
+        Address notSet= new Address("not set", "not set", "not set",0.0,0.0);
+        Provider.of<AppData>(context, listen: false).setWorkLocation(notSet);
+      }
     gender=dataSnapshot.value['gender']??"";
   }
 }

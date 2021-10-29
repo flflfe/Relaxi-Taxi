@@ -249,7 +249,7 @@ class _IntroOnBoardingScreenState extends State<IntroOnBoardingScreen> {
       scrollPhysics: BouncingScrollPhysics(),
 
       // Show or hide status bar
-      hideStatusBar: true,
+      hideStatusBar: false,
 
       // On tab change completed
       onTabChangeCompleted: this.onTabChangeCompleted,

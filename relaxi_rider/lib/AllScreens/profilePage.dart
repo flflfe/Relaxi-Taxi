@@ -3,8 +3,6 @@ import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -14,7 +12,6 @@ import 'package:flutter_app/AllScreens/tripHistoryPage.dart';
 import 'package:flutter_app/AllWidgets/dialogueBox.dart';
 import 'package:flutter_app/DataHandler/appData.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:flutter_app/AllWidgets/speedDialCustom.dart';
 import 'package:flutter_app/Assistants/methods.dart';
@@ -32,7 +29,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  UploadTask? task;
   String? imageUrl;
   File? image;
   double avgRate = 0;
@@ -44,29 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String phoneNumber='';
   String name='';
 
-  Future pickImage() async
-  {
-    try {
-      final image =await ImagePicker().pickImage(source: ImageSource.gallery);
-      if(image==null) return;
-      final tempImage = File(image.path);
-      final fileName = basename(tempImage.path);
-      final destination='files/$fileName';
-      task= Methods.uploadImage(destination, tempImage);
-      if (task == null) return;
-      final snapShot = await task!.whenComplete((){});
-      final String urlDownload = await snapShot.ref.getDownloadURL();
-      setState(() {
-        this.imageUrl=urlDownload;
-        this.image= tempImage;
-      } );
 
-    } on PlatformException catch (e) {
-      print('Failed to pick image: $e');
-    }
-
-
-  }
   bool? is_expanded=false;
   Image? pickedImage;
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intro_slider/dot_animation_enum.dart';
 import 'package:intro_slider/intro_slider.dart';
@@ -33,6 +34,9 @@ class _IntroOnBoardingScreenState extends State<IntroOnBoardingScreen> {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIOverlays(
+        [SystemUiOverlay.top, SystemUiOverlay.bottom]);
+
     super.initState();
 
     slides.add(
@@ -260,40 +264,46 @@ class _IntroOnBoardingScreenState extends State<IntroOnBoardingScreen> {
   Widget build(BuildContext context) {
     final double _height= MediaQuery.of(context).size.height;
     final double _width= MediaQuery.of(context).size.width;
-    return new IntroSlider(
-      // Skip button
-      renderSkipBtn: this.renderSkipBtn(),
-      skipButtonStyle: myButtonStyle(),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: IntroSlider(
 
-      // Next button
-      renderNextBtn: this.renderNextBtn(),
-      nextButtonStyle: myButtonStyle(),
+          // Skip button
+          renderSkipBtn: this.renderSkipBtn(),
+          skipButtonStyle: myButtonStyle(),
 
-      // Done button
-      renderDoneBtn: this.renderDoneBtn(),
-      onDonePress: this.onDonePress,
-      doneButtonStyle: myButtonStyle(),
+          // Next button
+          renderNextBtn: this.renderNextBtn(),
+          nextButtonStyle: myButtonStyle(),
 
-      // Dot indicator
-      colorDot: Colors.grey.shade200,
-      //sizeDot: 13.0,
-      typeDotAnimation: dotSliderAnimation.DOT_MOVEMENT,
-      colorActiveDot: grad1,
-      // Tabs
-      listCustomTabs: this.renderListCustomTabs(context),
-      backgroundColorAllSlides: Colors.white,
-      refFuncGoToTab: (refFunc) {
-        this.goToTab = refFunc;
-      },
+          // Done button
+          renderDoneBtn: this.renderDoneBtn(),
+          onDonePress: this.onDonePress,
+          doneButtonStyle: myButtonStyle(),
 
-      // Behavior
-      scrollPhysics: BouncingScrollPhysics(),
+          // Dot indicator
+          colorDot: Colors.grey.shade200,
+          //sizeDot: 13.0,
+          typeDotAnimation: dotSliderAnimation.DOT_MOVEMENT,
+          colorActiveDot: grad1,
+          // Tabs
+          listCustomTabs: this.renderListCustomTabs(context),
+          backgroundColorAllSlides: Colors.white,
+          refFuncGoToTab: (refFunc) {
+            this.goToTab = refFunc;
+          },
 
-      // Show or hide status bar
-      hideStatusBar: true,
+          // Behavior
+          scrollPhysics: BouncingScrollPhysics(),
 
-      // On tab change completed
-      onTabChangeCompleted: this.onTabChangeCompleted,
+          // Show or hide status bar
+          hideStatusBar: false,
+
+          // On tab change completed
+          onTabChangeCompleted: this.onTabChangeCompleted,
+        ),
+      ),
     );
   }
 }

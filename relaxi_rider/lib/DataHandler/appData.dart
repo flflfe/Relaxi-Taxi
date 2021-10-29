@@ -18,6 +18,14 @@ class AppData extends ChangeNotifier
    pickUpLocation= pickupAddress;
    notifyListeners();
  }
+ Future<void>? setWorkLocation(Address work)
+ {
+   workLocation= work;
+ }
+ Future<void>? setHomeLocation(Address home)
+ {
+   homeLocation= home;
+ }
  Future<void>? updateHomeLocation(Address home)
  {
    homeLocation= home;

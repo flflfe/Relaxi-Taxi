@@ -1,6 +1,9 @@
 import 'dart:io';
 
+import 'package:connectivity/connectivity.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
+import 'package:relaxi_driver/Assistants/utils.dart';
 import 'package:relaxi_driver/Configurations/configMaps.dart';
 import 'package:relaxi_driver/DataHandler/appData.dart';
 import 'package:relaxi_driver/Models/AllUsers.dart';
@@ -12,7 +15,6 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:relaxi_driver/Models/drivers.dart';
 import 'package:relaxi_driver/Models/history.dart';
 import 'package:relaxi_driver/main.dart';
@@ -41,6 +43,7 @@ class Methods
     }
   return placeAddress;
 }
+
   static Future<DirectionDetails?> obtainPlaceDirectionDetails(LatLng initialPosition, LatLng finalPosition) async
   {
     String directionUrl ="https://maps.googleapis.com/maps/api/directions/json?origin=${initialPosition.latitude},${initialPosition.longitude}&destination=${finalPosition.latitude},${finalPosition.longitude}&key=$mapKey";
@@ -86,18 +89,7 @@ class Methods
     });
   }
 
-  ///for image picker
-  static UploadTask? uploadImage(String destination, File file){
-    try {
-      final ref= FirebaseStorage.instance.ref(destination);
-      print('Successfully uploaded image');
-      return ref.putFile(file);
-    } on FirebaseException catch (e) {
-      // TODO
-      print('couldn\'t upload image: $e');
-      return null;
-    }
-  }
+
   //////////////////
   static void disableHomeTabLocationLiveUpdate()
   {

@@ -13,8 +13,8 @@ class PredictionsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: TextButton(
-        onPressed: (){
-        search.getPlaceAddressDetails(placePredictions.place_id, context, place: location);
+        onPressed: ()async{
+        await search.getPlaceAddressDetails(placePredictions.place_id, context, place: location);
         },
         style: ButtonStyle(
           overlayColor: MaterialStateProperty.resolveWith<Color>(

@@ -96,20 +96,13 @@ class _PhoneVerificationState extends State<PhoneVerification> {
         phoneValid=true;
       });
       //add after testing
-      /*showDialog(context: context,
+      showDialog(context: context,
           barrierDismissible: false,
           builder:(BuildContext context){
             return DialogueBox(message: "Sending OTP",);
-          }).whenComplete(() => print('dialogue dismissed'));*/
+          }).whenComplete(() => setState((){otpDialogueDismissed=true;}));
       await verifyPhone();
-      //remove after testing
-      buttonCarouselController.nextPage(
-          duration: Duration(milliseconds: 500)
-          , curve: Curves.easeInOutQuad
-      );
-      setState(() {
-        current_page++;
-      });
+
     }
     }
   }
@@ -171,7 +164,7 @@ class _PhoneVerificationState extends State<PhoneVerification> {
       await _auth.verifyPhoneNumber(
           phoneNumber: countryCode+phoneTextEditingController.text, // PHONE NUMBER TO SEND OTP
           //remove after testing
-          autoRetrievedSmsCodeForTesting: '111111',
+          //autoRetrievedSmsCodeForTesting: '111111',
           codeAutoRetrievalTimeout: (String verId) {
             //Starts the phone number verification process for the given phone number.
             //Either sends an SMS with a 6 digit code to the phone number specified, or sign's the user in and [verificationCompleted] is called.
@@ -179,12 +172,13 @@ class _PhoneVerificationState extends State<PhoneVerification> {
           },
           // WHEN CODE SENT THEN WE OPEN DIALOG TO ENTER OTP.
           //codeSent: smsOTPSent,  add this after testing
-          codeSent: (String verId, int? forceCodeResend){},
+          codeSent:smsOTPSent,
           timeout: const Duration(seconds: 30),
           verificationCompleted: (PhoneAuthCredential phoneAuthCredential) {
             print(phoneAuthCredential.smsCode);
             setState(() {
               smsOtpSent=phoneAuthCredential.smsCode!;
+              print(smsOtpSent);
             });
           },
           verificationFailed: (FirebaseAuthException exceptio) {
@@ -438,7 +432,7 @@ class _PhoneVerificationState extends State<PhoneVerification> {
                               if(this.smsOTP==smsOtpSent)
                               {
                                 print('matched');
-                                savePhoneNumber(context);
+                                await savePhoneNumber(context);
                                 print('done saving info');
                                 buttonCarouselController.nextPage(
                                     duration: Duration(milliseconds: 500)
@@ -554,10 +548,17 @@ class _PhoneVerificationState extends State<PhoneVerification> {
       resizeToAvoidBottomInset: false,
     );
   }
-  void savePhoneNumber(context)
+  Future<void> savePhoneNumber(context)async
   {
     String userId= firebaseUser!.uid;
-    userRef.child(userId).child("phone").set(countryCode+phoneTextEditingController.text.trim());
+    showDialog(context: context,
+        barrierDismissible: false,
+        builder:(BuildContext context){
+          return DialogueBox(message: "Saving Data",);
+        });
+    print("heeeeere  $userId");
+    await userRef.child(userId).child("phone").set(countryCode+phoneTextEditingController.text.trim());
+    Navigator.pop(context);
   }
 
 

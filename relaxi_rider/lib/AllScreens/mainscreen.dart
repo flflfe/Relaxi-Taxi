@@ -164,18 +164,13 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   @override
   void initState()
   {
-    // TODO: implement initState
     getOnlineUser();
     super.initState();
     _addCustomMapMarker();
-
   }
   void getOnlineUser() async
   {
-    showDialog(context: context,barrierDismissible: false,
-        builder: (BuildContext context)=> DialogueBox(message: "Loading Info..."));
-    await Methods.getCurrentOnlineUserInfo();
-    Navigator.pop(context);
+    await Methods.getCurrentOnlineUserInfo(context);
   }
   void saveTrip()
   {
@@ -578,7 +573,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                         print("total Trips:::::: ${userCurrentInfo.total_trips!}");
                         showDialog(context: context,barrierDismissible: false,
                             builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
-                        await Methods.getCurrentOnlineUserInfo();
+                        await Methods.getCurrentOnlineUserInfo(context);
                         Navigator.pop(context);
                         Navigator.pushNamed(context, ProfilePage.id_screen);
 
@@ -594,7 +589,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                     ),
                     Divider(height: 2,),
                     ListTile(
-                      onTap: (){},
+                      onTap: (){
+                        launch("https://github.com/DoniaEsawi/Relaxi-Taxi");
+                      },
                       onLongPress: (){},
                       leading: Icon(Icons.info_outlined, color: grad1,),
                       title: Text('About',style: GoogleFonts.overlock(
@@ -694,7 +691,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                     child: Column(
                       children: [
                         //SizedBox(height:(((320/xd_height)*_height)/2)-80),
-                        Icons_Map(width: _width,locate: locatePosition, getHomeWork: getHomeWork()!,),
+                        Icons_Map(width: _width,locate: locatePosition),
                         SizedBox(height: 10.0,),
 
                         Hi_There(),
@@ -710,10 +707,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                         Divider(indent: 50.0,endIndent: 50.0,),
                         GestureDetector(
                         onTap: () async{
-                          showDialog(context: context,barrierDismissible: false,
-                              builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
-                          await getHomeWork();
-                          Navigator.pop(context);
                           var res = await Navigator.push(context,
                           MaterialPageRoute(builder: (context)=>SearchScreen()));
                           if (res== "obtainDirection")
@@ -739,6 +732,18 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
                         child: Container(
                         decoration: BoxDecoration(
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.grey,
+                            offset: Offset(4,4),
+                            blurRadius: 4
+                          ),
+                          BoxShadow(
+                              color: Color(0xFFFFFDF1),
+                              offset: Offset(-3,-3),
+                              blurRadius: 5
+                          )
+                        ],
                         color: Colors.white,
                         border: Border.all(
                         color: yellow,
@@ -796,7 +801,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                     child: Column(
                       children: [
                         Expanded(
-                          flex:6,
+                          flex:4,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 0.0,vertical: 4.0),
                             child: SingleChildScrollView(
@@ -805,162 +810,16 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      border: Border.all(color: (isEconomy==true)?grad1:Colors.grey.shade400, width: (isEconomy==true)?2.5:1.0)
-                                    ),
-                                    child: TextButton(
-                                      style: ButtonStyle(
-
-                                      ),
-                                      onPressed: (){
-                                        setState(() {
-                                          isEconomy=true;
-                                          isLuxury=false;
-                                          isTaxi=false;
-                                          isTokTok=false;
-
-                                        });
-                                      },
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Expanded(flex:2,child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                            child: Image.asset('assets/economyCar.png',width: 100.0,),
-                                          )),
-                                          Text('Economy',style: GoogleFonts.openSans(fontSize:16.0,
-                                              fontWeight: (isEconomy==true)?FontWeight.bold:FontWeight.normal,
-                                              color: (isEconomy==true)?grad1:grey),)
-                                        ],
-                                      ),
-                                    ),
-
-                                  ),
-                                ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          border: Border.all(color: (isLuxury==true)?grad1:Colors.grey.shade400, width: (isLuxury==true)?2.5:1.0)
-                                      ),
-                                      child: TextButton(
-                                        style: ButtonStyle(
-
-                                        ),
-                                        onPressed: (){
-                                          setState(() {
-                                            isEconomy=false;
-                                            isLuxury=true;
-                                            isTaxi=false;
-                                            isTokTok=false;
-
-                                          });
-                                        },
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Expanded(flex:2,child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                              child: Image.asset('assets/luxuryCar.png',width: 100.0),
-                                            )),
-                                            Text('Luxury',style: GoogleFonts.openSans(fontSize:16.0,
-                                                fontWeight: (isLuxury==true)?FontWeight.bold:FontWeight.normal,
-                                                color: (isLuxury==true)?grad1:grey))
-                                          ],
-                                        ),
-                                      ),
-
-                                    ),
-                                  ),
-                                  Padding(padding: EdgeInsets.all(8.0),
-                                  child: Container(
-
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20.0),
-                                        border: Border.all(color: (isTaxi==true)?grad1:Colors.grey.shade400, width: (isTaxi==true)?2.5:1.0)
-                                    ),
-                                    child: TextButton(
-                                      style: ButtonStyle(
-
-                                      ),
-                                      onPressed: (){
-                                        setState(() {
-                                          isEconomy=false;
-                                          isLuxury=false;
-                                          isTaxi=true;
-                                          isTokTok=false;
-
-                                        });
-                                      },
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Expanded(flex:2,child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                            child: Image.asset('assets/taxiCar.png',width: 100.0),
-                                          )),
-                                          Text('Classic',style: GoogleFonts.openSans(fontSize:16.0,
-                                              fontWeight: (isTaxi==true)?FontWeight.bold:FontWeight.normal,
-                                              color: (isTaxi==true)?grad1:grey))
-                                        ],
-                                      ),
-                                    ),
-
-                                  ),
-                                  ),
-                                  Padding(padding: EdgeInsets.all(8.0),
-                                    child: Container(
-
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(20.0),
-                                          border: Border.all(color: (isTokTok==true)?grad1:Colors.grey.shade400,
-                                              width: (isTokTok==true)?2.5:1.0)
-                                      ),
-                                      child: TextButton(
-                                        style: ButtonStyle(
-
-                                        ),
-                                        onPressed: (){
-                                          setState(() {
-                                            isEconomy=false;
-                                            isLuxury=false;
-                                            isTaxi=false;
-                                            isTokTok=true;
-                                          });
-                                        },
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Expanded(flex:2,child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                              child: Image.asset('assets/toktok.png',width: 100.0),
-                                            )),
-                                            Text('TokTok',style: GoogleFonts.openSans(fontSize:16.0,
-                                                fontWeight: (isTokTok==true)?FontWeight.bold:FontWeight.normal,
-                                                color: (isTokTok==true)?grad1:grey))
-                                          ],
-                                        ),
-                                      ),
-
-                                    ),
-                                  )
+                                  buildPadding(0),
+                                  buildPadding(1),
+                                  buildPadding(2),
+                                  buildPadding(3)
 
                               ],),
                             ),
                           ),
                         ),
-                        Divider(height:0.0,),
+                        Divider(height:0.0,color: grad1,),
                         Expanded(
                           flex:2,
                           child: Container(
@@ -975,49 +834,32 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                                         mainAxisAlignment: MainAxisAlignment.center,
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('Distance: ${tripDirectionDetails.distanceText}',style: GoogleFonts.ubuntuMono(
-                                            fontSize: 14.0,
+                                        Text(
+                                          'Distance: ${tripDirectionDetails.distanceText}',style: GoogleFonts.ubuntuMono(
+                                            fontSize: 16.0,
                                             color: Colors.grey.shade700
-                                        ),),
-                                        Text('Duration: ${tripDirectionDetails.durationText}',style: GoogleFonts.ubuntuMono(
-                                            fontSize: 14.0,
-                                            color: Colors.grey.shade700
-                                        ),),
+                                        ),textAlign: TextAlign.center,),
+
                                       ],
                                     ),
                                   ),
+                                  VerticalDivider(thickness: 2.0,color: grad1,),
                                   Expanded(
-                                    child: Text(
-                                      isTaxi?
-                                      'Estimated fares: '
-                                        '${Methods.calculateFares(tripDirectionDetails)+5}'
-                                        ' £':
-                                      isLuxury?
-                                      'Estimated fares: '
-                                          '${Methods.calculateFares(tripDirectionDetails)+15}'
-                                          ' £':
-                                      isEconomy?
-                                      'Estimated fares: '
-                                          '${Methods.calculateFares(tripDirectionDetails)}'
-                                          ' £':
-                                      'Estimated fares: '
-                                          '${Methods.calculateFares(tripDirectionDetails)-5}'
-                                          ' £'
-                                      ,style: GoogleFonts.ubuntuMono(
-                                      fontSize: 14.0,
-                                      color: Colors.grey.shade700
-                                    ),),
+                                    child:  Text('Duration: ${tripDirectionDetails.durationText}',style: GoogleFonts.ubuntuMono(
+                                        fontSize: 16.0,
+                                        color: Colors.grey.shade700
+                                    ),textAlign: TextAlign.center,),
                                   ),
                                 ],
                               ),
                             ),
                           ),
                         ),
-                        Divider(height: 0.0,),
+                        Divider(height: 0.0,color: grad1,),
                         Expanded(
-                            flex:4,
+                            flex:3,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              padding: const EdgeInsets.symmetric(vertical: 20.0),
                               child: SubmitButton(onPressed: (){
                               setState(() {
                                 requestDriveHeight = _height;
@@ -1027,7 +869,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
                               availableDrivers = GeofireAssistant.nearByAvailableDriversList;
                               searchNearestDriver();
                               },txt: "Send Request",
-                              txtColor: Colors.black,),
+                              ),
                             ))
                       ],
                     ),
@@ -1215,6 +1057,106 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       )
 
     );
+  }
+
+  Padding buildPadding(int id) {
+    return Padding(padding: EdgeInsets.all(8.0),
+                                  child: Container(
+
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(20.0),
+                                        border: Border.all(color: ((id==3&&isTokTok==true)||
+                                            (id==0&&isEconomy==true)||
+                                            (id==2&&isTaxi==true)||
+                                            (id==1&&isLuxury==true))?grad1:Colors.grey.shade400,
+                                            width: ((id==3&&isTokTok==true)||
+                                                (id==0&&isEconomy==true)||
+                                                (id==2&&isTaxi==true)||
+                                                (id==1&&isLuxury==true))?2.5:1.0)
+                                    ),
+                                    child: TextButton(
+                                      style: ButtonStyle(
+                                      ),
+                                      onPressed: (){
+                                        setState(() {
+                                          isEconomy=id==0?true:false;
+                                          isLuxury=id==1?true:false;
+                                          isTaxi=id==2?true:false;
+                                          isTokTok=id==3?true:false;
+
+                                        });
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Expanded(
+
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                                  child: Image.asset(id==0?'assets/economyCar.png':id==1?'assets/luxuryCar.png':
+                                                  id==2?'assets/taxiCar.png':'assets/toktok.png',width: 75.0),
+                                                ),
+                                              ),
+                                              Text(id==0?'Economy':id==1?'Luxury':
+                                              id==2?'Classic':'Toktok',style: GoogleFonts.openSans(fontSize:14.0,
+                                                  fontWeight: ((id==3&&isTokTok==true)||
+                                                      (id==0&&isEconomy==true)||
+                                                      (id==2&&isTaxi==true)||
+                                                      (id==1&&isLuxury==true))?FontWeight.bold:FontWeight.normal,
+                                                  color:((id==3&&isTokTok==true)||
+                                                      (id==0&&isEconomy==true)||
+                                                      (id==2&&isTaxi==true)||
+                                                      (id==1&&isLuxury==true))?grad1:grey))
+                                            ],
+                                          ),
+                                          VerticalDivider(
+                                            thickness:  ((id==3&&isTokTok==true)||
+                                                (id==0&&isEconomy==true)||
+                                                (id==2&&isTaxi==true)||
+                                                (id==1&&isLuxury==true))?3.0:0.0,
+                                            width:  ((id==3&&isTokTok==true)||
+                                                (id==0&&isEconomy==true)||
+                                                (id==2&&isTaxi==true)||
+                                                (id==1&&isLuxury==true))?10.0:0.0,
+                                            color: ((id==3&&isTokTok==true)||
+                                                (id==0&&isEconomy==true)||
+                                                (id==2&&isTaxi==true)||
+                                                (id==1&&isLuxury==true))?Colors.grey.shade300:Colors.transparent,
+                                          ),
+                                          Text(
+                                              (id==2&&isTaxi==true)?
+                                                  '💸\n'
+                                                  '${Methods.calculateFares(tripDirectionDetails)+5}'
+                                                  ' £':
+                                              (id==1&&isLuxury==true)?
+                                                  '💸\n'
+                                                  '${Methods.calculateFares(tripDirectionDetails)+15}'
+                                                  ' £':
+                                              (id==0&&isEconomy==true)?
+                                                  '💸\n'
+                                                  '${Methods.calculateFares(tripDirectionDetails)}'
+                                                  ' £':
+                                              (id==3&&isTokTok==true)?
+                                                  '💸\n'
+                                                  '${Methods.calculateFares(tripDirectionDetails)-5}'
+                                                  ' £':
+                                                  '',
+                                            style: GoogleFonts.pacifico(
+                                              fontSize: 16.0,
+                                              color: grey,
+
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          )
+                                        ],
+                                      ),
+                                    ),
+
+                                  ),
+                                );
   }
   Future<void> getPlacedDirection({final_pos='dropOff'}) async
   {
@@ -1486,40 +1428,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       });
 
   }
-  Future<void>? getHomeWork() async
-  {
-    await Methods.getCurrentOnlineUserInfo();
-    if(userCurrentInfo.work ==null || userCurrentInfo.home==null) {
 
-      if(userCurrentInfo.work != null ) {
-        await Provider.of<AppData>(context, listen: false).updateWorkLocation(
-            userCurrentInfo.work!);
-      }
-      else if(userCurrentInfo.work == null ){
-        Address notSet= new Address("not set", "not set", "not set",0.0,0.0);
-        await Provider.of<AppData>(context, listen: false).updateWorkLocation(notSet);
-      }
-      if(userCurrentInfo.home != null ) {
-        await Provider.of<AppData>(context, listen: false).updateHomeLocation(
-            userCurrentInfo.home!);
-      }
-      else if(userCurrentInfo.home == null ){
-        Address notSet= new Address("not set", "not set", "not set",0.0,0.0);
-        await Provider.of<AppData>(context, listen: false).updateHomeLocation(notSet);
-      }
-
-    }
-    else if(Provider.of<AppData>(context, listen: false).homeLocation == null)
-    {
-      await Provider.of<AppData>(context, listen: false).updateHomeLocation(
-          userCurrentInfo.home!);
-    }
-    else if(Provider.of<AppData>(context, listen: false).workLocation == null)
-    {
-      await Provider.of<AppData>(context, listen: false).updateWorkLocation(
-          userCurrentInfo.work!);
-    }
-  }
 }
 
 
@@ -1554,10 +1463,9 @@ class Hi_There extends StatelessWidget {
 
 class Icons_Map extends StatelessWidget {
   final VoidCallback locate;
-  final Future<void> getHomeWork;
   Icons_Map({
     Key? key,
-    required double width, required this.locate,required this.getHomeWork
+    required double width, required this.locate
   }) : _width = width, super(key: key);
 
   final double _width;
@@ -1571,10 +1479,7 @@ class Icons_Map extends StatelessWidget {
         ),
 
         MapButton(icon: Icon(Icons.home,color: grad1,),heroTag:"homeBtn",onPressed: ()async{
-          showDialog(context: context,barrierDismissible: false,
-              builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
-          await getHomeWork;
-          Navigator.pop(context);
+
           Navigator.push(context,
               MaterialPageRoute(builder: (context)=>AddHomeWorkScreen(home: true)));
         }),
@@ -1582,10 +1487,6 @@ class Icons_Map extends StatelessWidget {
           width: 15,
         ),
         MapButton(icon: Icon(Icons.work,color: grad1,),heroTag:"workBtn",onPressed: ()async{
-          showDialog(context: context,barrierDismissible: false,
-              builder: (BuildContext context)=> DialogueBox(message: "Loading ..."));
-          await getHomeWork;
-          Navigator.pop(context);
           Navigator.push(context,
               MaterialPageRoute(builder: (context)=>AddHomeWorkScreen(home: false)));
         }),

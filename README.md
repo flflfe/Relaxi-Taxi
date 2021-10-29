@@ -11,7 +11,7 @@
  ## Supported Platforms 📱
  
  <div display="inline-block" >
-  <table width="auto" display="inline-block">
+  <table width="auto" display="inline-block" table-layout= "fixed">
   <tr>
 <td> OS </td>
    <td> Status </td> 
@@ -26,7 +26,7 @@
    </tr>
   </table >
 
-<a href=""> 
+<a href="" display="inline-block"> 
     <img src="repo_assets/android-button.png" height="100"
          alt="Get it on Android">
 </a>

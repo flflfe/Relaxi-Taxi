@@ -8,6 +8,7 @@
    Not just a Taxi... It's Relaxi ^_- 
  </h3>  
  <div style="display: flex;">
+ <p>
 ## Supported Platforms
 
 | OS | Status |
@@ -20,6 +21,7 @@
     <img src="repo_assets/android-button.png"
          alt="Get it on Android" height="100">
 </a>
+ </p>
 </div>
 </br></br>
 

@@ -12,12 +12,20 @@
  
  <tr>
  <td>
-  
-| OS | Status |
-| -- | -- |
-| Android | Tested and working on Android |
-| iOS | Not yet compatible |
- 
+  <table >
+  <tr>
+<td> OS </td>
+   <td> Status </td> 
+   </tr>
+    <tr>
+<td> Android </td>
+   <td> Tested and working on Android </td> 
+   </tr>
+    <tr>
+<td> iOS </td>
+   <td> Not yet compatible </td> 
+   </tr>
+  </table >
  </td>
  <td>
 <a href=""> 

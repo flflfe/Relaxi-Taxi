@@ -15,11 +15,10 @@
 | Android | Tested and working on Android |
 | iOS | Not yet compatible |
 
-<br/>
 <div align="center" >
 <a href=""> 
     <img src="repo_assets/android-button.png"
-         alt="Get it on Android" height="120">
+         alt="Get it on Android" height="100">
 </a>
 
 </div>
